@@ -106,3 +106,113 @@ Channel হলো খুবই lightweight একটা communication ব্য�
 
 এই কারণে, RabbitMQ একসাথে প্রচুর মেসেজ প্রসেস করতে পারে, কারণ প্রতিটি চ্যানেল আলাদা আলাদা ভাবে কাজ করে।
 
+
+
+# RabbitMQ Exchange এবং Exchange টাইপ
+
+## RabbitMQ পরিচিতি
+
+RabbitMQ-এর Exchange এবং বিভিন্ন Exchange টাইপ সম্পর্কে জানার আগে, মেসেজ, Queue এবং চ্যানেল সম্পর্কে জানা জরুরি। যদি না জেনে থাকেন, তাহলে RabbitMQ মেসেজ, চ্যানেল এবং Queue কীভাবে কাজ করে তা জানতে পারেন **RabbitMQ পর্ব - ২** থেকে। এছাড়া, কোন ধরণের পরিস্থিতিতে RabbitMQ ব্যবহার করা উচিত তা জানতে পারেন **RabbitMQ পর্ব - ১** থেকে।
+
+আজ আমরা RabbitMQ Exchange এবং এর বিভিন্ন ধরণের Exchange টাইপ সম্পর্কে জানবো।
+
+## Exchange কী?
+
+Exchange হচ্ছে RabbitMQ-এর রাউটিং মেকানিজম, যা বলে দেয় একটি মেসেজ কিভাবে এবং কোন উপায়ে Queue-এর কাছে পৌঁছাতে পারে। যখন কোনো অ্যাপ্লিকেশন RabbitMQ-তে মেসেজ পাঠায়, তখন Publisher ক্লাস সেটি Exchange-এর কাছে পাঠায়, এবং Exchange সেটি নির্দিষ্ট Queue-তে পৌঁছে দেয়।
+
+### Exchange-এর কার্যপ্রণালী
+
+১. অ্যাপ্লিকেশন ইমেইল পাঠানোর রিকোয়েস্ট করে Publisher ক্লাসের কাছে।
+2. Publisher ক্লাস মেসেজ RabbitMQ-এর কাছে পাঠিয়ে দেয়।
+3. RabbitMQ সেই মেসেজ Queue-তে সংরক্ষণ করে।
+4. Publisher ক্লাস কীভাবে Queue-তে মেসেজ পাঠায়? এর উত্তর হলো **Exchange**।
+
+### Exchange টাইপসমূহ
+
+1. **Direct Exchange**
+2. **Fanout Exchange**
+3. **Topic Exchange**
+4. **Headers Exchange**
+5. **Delay Exchange**
+6. **Alternative Exchange**
+
+## মেসেজ পাবলিশ ফ্লো
+
+RabbitMQ-তে মেসেজ কীভাবে Publisher থেকে Queue-তে পৌঁছায় তা নিচের ধাপে ব্যাখ্যা করা হলো:
+
+1. **AMQP কানেকশন তৈরি করা** - RabbitMQ-এর সাথে কানেক্ট করার জন্য AMQP (Advanced Message Queuing Protocol) ব্যবহার করা হয়।
+2. **চ্যানেল তৈরি করা** - AMQP কানেকশন ব্যবহার করে চ্যানেল তৈরি করা হয়।
+3. **Publisher মেসেজকে Exchange-এ পাঠায়** - Exchange কোনো মেসেজ সংরক্ষণ করে না, এটি শুধুমাত্র Routing Key এবং Binding Rules অনুযায়ী Queue-তে মেসেজ পাঠায়।
+
+### Routing Key
+
+Routing Key হচ্ছে একটি স্ট্রিং, যা Publisher মেসেজ পাবলিশ করার সময় Exchange-এর কাছে পাঠায়। RabbitMQ-এর Exchange এই Key ব্যবহার করে সিদ্ধান্ত নেয় মেসেজটি কোন Queue-তে যাবে।
+
+## Exchange টাইপ ব্যাখ্যা
+
+### 1. Direct Exchange
+
+Direct Exchange-এ Publisher থেকে যে Routing Key আসে, তা Queue-এর Routing Key-এর সাথে **exact match** করলে মেসেজ সেই Queue-তে store হয়।
+
+```javascript
+const amqp = require('amqplib');
+
+async function setup() {
+    const connection = await amqp.connect('amqp://guest:guest@localhost:5672');
+    const channel = await connection.createChannel();
+    
+    const exchange_name = 'send_email_exchange';
+    await channel.assertExchange(exchange_name, 'direct', { durable: true });
+    
+    console.log('✅ Direct Exchange');
+    await channel.close();
+    await connection.close();
+}
+setup().catch(console.error);
+```
+
+### 2. Fanout Exchange
+
+Fanout Exchange-এ মেসেজ পাঠানোর সময় Routing Key চেক করা হয় না। Exchange-এর সাথে যতগুলো Queue Bind করা থাকে, সেগুলোতে একই সাথে মেসেজ পাঠিয়ে দেওয়া হয়। এটি **Broadcast Messaging** প্যাটার্নের মতো কাজ করে।
+
+```javascript
+await channel.assertExchange('fanout_exchange', 'fanout', { durable: true });
+```
+
+### 3. Topic Exchange
+
+Topic Exchange-এ Routing Key **প্যাটার্ন অনুযায়ী ম্যাচ করে**। উদাহরণস্বরূপ:
+
+- `queue.email_sending_queue_routing_key`
+- `queue.sms_notification_queue_routing_key`
+- `queue.payment_queue_routing_key`
+- `queue.#`
+
+`queue.#` এটি Wildcard Mode, যা Queue-এর পরে যেকোনো ওয়ার্ড ম্যাচ করবে।
+
+```javascript
+await channel.assertExchange('topic_exchange', 'topic', { durable: true });
+```
+
+### 4. Delay Exchange
+
+Delay Exchange হলো RabbitMQ-এর একটি বিশেষ ফিচার, যা নির্দিষ্ট **সময় পরে** মেসেজ প্রসেস করে। এটি সাধারণত **Retry Mechanism** হিসাবে ব্যবহৃত হয়।
+
+**Delay Exchange-এর Flow:**
+
+1. মেসেজটি **delay_queue**-তে পাঠানো হয়।
+2. **TTL (Time-To-Live)** নির্ধারণ করা হয়, অর্থাৎ কতক্ষণ পরে মেসেজটি প্রসেস হবে।
+3. TTL শেষ হলে মেসেজটি **primary_queue**-তে পাঠানো হয় এবং প্রসেস করা হয়।
+
+```javascript
+await channel.assertExchange('delay_exchange', 'direct', { durable: true });
+```
+
+## উপসংহার
+
+RabbitMQ-এর Exchange বিভিন্ন পদ্ধতিতে মেসেজ ডেলিভারি নিশ্চিত করে। Exchange টাইপ নির্বাচন করা হয় **ব্যবহার পরিস্থিতি অনুযায়ী**। **Direct, Fanout, Topic এবং Delay Exchange** হলো সবচেয়ে বেশি ব্যবহৃত Exchange টাইপ।
+
+এই গাইড অনুসরণ করে আপনি RabbitMQ-এর Exchange নিয়ে কাজ করতে পারবেন এবং উপযুক্ত Exchange টাইপ নির্বাচন করতে পারবেন। 🚀
+
+
+
