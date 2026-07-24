@@ -1,25 +1,184 @@
 # RabbitMQ — সম্পূর্ণ গাইড
 
-## সূচিপত্র (Table of Contents)
+> RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে।
 
-1. [RabbitMQ কী এবং কেন — Real-life Examples](#১-rabbitmq-কী-এবং-কেন--real-life-examples)
-2. [যে সমস্যা সমাধান করে](#২-যে-সমস্যা-সমাধান-করে)
-3. [কীভাবে কাজ করে — Flow](#৩-কীভাবে-কাজ-করে--flow)
-4. [ভেতরের মেকানিজম — Internals](#৪-ভেতরের-মেকানিজম--internals)
-5. [Message Ordering — বিস্তারিত](#৫-message-ordering--বিস্তারিত)
-6. [High Availability — Cluster, Quorum Queue ও Raft](#৬-high-availability--cluster-quorum-queue-ও-raft)
-7. [Mirrored Queue — পুরনো ও Deprecated পদ্ধতি](#৭-mirrored-queue--পুরনো-ও-deprecated-পদ্ধতি)
-8. [RabbitMQ vs Kafka](#৮-rabbitmq-vs-kafka)
-9. [ইন্টারভিউ প্রশ্ন — সব লেভেল](#৯-ইন্টারভিউ-প্রশ্ন--সব-লেভেল)
-10. [Advanced ইন্টারভিউ প্রশ্ন-উত্তর](#১০-advanced-ইন্টারভিউ-প্রশ্ন-উত্তর)
-11. [আরও গভীর ইন্টারভিউ প্রশ্ন-উত্তর (Q9–Q22)](#১১-আরও-গভীর-ইন্টারভিউ-প্রশ্ন-উত্তর-q9q22)
-12. [Real-World Project — সমস্যা ও সমাধান (কোডসহ)](#১২-real-world-project--সমস্যা-ও-সমাধান-কোডসহ)
+# 📘 RabbitMQ মাস্টার গাইড — কোর্স প্ল্যান
+
+## ১. RabbitMQ পরিচিতি ও বাস্তব উদাহরণ
+
+**আলোচ্য বিষয়:**
+
+* [RabbitMQ কী এবং কেন — মূল ধারণা](#১-rabbitmq-ক-এব-কন-real-life-examples)
+* [Food Delivery App (Foodpanda/Pathao)](#১-food-delivery-app-যমন-foodpandapathao)
+* [E-commerce Order Processing (Daraz/Amazon)](#২-e-commerce-order-processing-darazamazon-টইপ)
+* [Video/Image Processing (YouTube)](#৩-videoimage-processing-youtube-টইপ)
+* [Email/SMS Notification System](#৪-emailsms-notification-system)
+* [Ride-Sharing App (Uber/Pathao)](#৫-ride-sharing-app-uberpathao)
+* [মূল ধারণাটা কী — common pattern](#মল-ধরণট-ক)
+
+---
+
+## ২. কেন RabbitMQ — যে সমস্যা সমাধান করে
+
+**আলোচ্য বিষয়:**
+
+* [Synchronous approach-এর সমস্যা (RabbitMQ ছাড়া)](#২-য-সমসয-সমধন-কর)
+* [Queue দিয়ে asynchronous সমাধান](#২-য-সমসয-সমধন-কর)
+
+---
+
+## ৩. কার্যপ্রণালী — Flow (৫ ধাপ)
+
+**আলোচ্য বিষয়:**
+
+* [Producer](#১-producer)
+* [Exchange](#২-exchange)
+* [Queue](#৩-queue)
+* [Consumer](#৪-consumer)
+* [Acknowledgement (Ack)](#৫-acknowledgement-ack)
+
+---
+
+## ৪. Internals — ভেতরের মেকানিজম
+
+**আলোচ্য বিষয়:**
+
+* [Connection বনাম Channel](#connection-আর-channel-পরথকয-ক)
+* [Exchange Types (Direct/Fanout/Topic/Headers)](#exchange-types-বসতরত)
+* [Reliability / Durability — মেসেজ কীভাবে হারায় না](#reliability-durability-মসজ-কভব-হরয-ন)
+* [Ack — Manual vs Automatic](#ack-manual-vs-automatic)
+* [Prefetch Count](#prefetch-count-কন-গরতবপরণ)
+* [Dead Letter Queue (DLQ)](#dead-letter-queue-dlq)
+
+---
+
+## ৫. Message Ordering (order guarantee)
+
+**আলোচ্য বিষয়:**
+
+* [Multiple Consumer-এ order কেন ভাঙে](#৫১-কন-multiple-consumer-থকল-order-ভঙ-যয)
+* [সমাধান ১: Routing Key দিয়ে Same Account = Same Queue](#৫২-সমধন-১-routing-key-দয-same-account-same-queue)
+* [সমাধান ২: Single Active Consumer](#৫৩-সমধন-২-single-active-consumer-rabbitmq-built-in-feature)
+* [Real World: ব্যাংক Transaction System ফ্লো](#৫৪-real-world-বযক-transaction-system-বসতরত-ফল)
+* [আরও সহজভাবে — একদম মৌলিক থেকে](#৫৫-আরও-সহজভব-একদম-মলক-থক)
+
+---
+
+## ৬. High Availability (Cluster / Quorum / Raft)
+
+**আলোচ্য বিষয়:**
+
+* [সমস্যা — Single Point of Failure (SPOF)](#পরথম-বঝ-সমসযট-ক)
+* [Cluster কীভাবে কাজ করে](#cluster-কভব-কজ-কর)
+* [Quorum Queue — বিস্তারিত](#quorum-queue-বসতরত)
+* [Raft Consensus Algorithm](#raft-consensus-algorithm-কভব-কজ-কর)
+* [Leader Crash হলে কী হয়](#leader-crash-হল-ক-হয)
+* [Real World উদাহরণ](#real-world-উদহরণ)
+* [Availability বনাম Latency Trade-off](#একট-গরতবপরণ-trade-off-ইনটরভউত-জজঞস-করত-পর)
+
+---
+
+## ৭. Mirrored Queue (Deprecated পদ্ধতি)
+
+**আলোচ্য বিষয়:**
+
+* [Mirrored Queue কীভাবে কাজ করতো](#mirrored-queue-কভব-কজ-করত)
+* [কেন বাদ দেওয়া হলো (split-brain, data loss)](#কন-mirrored-queue-বদ-দওয-হল-মল-সমসযগল)
+* [Quorum Queue কীভাবে সমাধান করলো](#quorum-queue-কভব-এই-সমসযগল-সমধন-করল)
+* [এক লাইনে মূল পার্থক্য](#এক-লইন-মল-পরথকয)
+* [Interview-এ যদি জিজ্ঞেস করে](#interview-এ-যদ-জজঞস-কর)
+
+---
+
+## ৮. RabbitMQ বনাম Kafka
+
+**আলোচ্য বিষয়:**
+
+* [মূল আর্কিটেকচারাল পার্থক্য (Queue vs Log model)](#মল-আরকটকচরল-পরথকয-এটই-আসল-করণ)
+* [কেন এই পার্থক্য Use Case নির্ধারণ করে](#কন-এই-পরথকযট-use-case-নরধরণ-কর)
+* [Practical Comparison Table](#একট-practical-comparison-table)
+* [Real World: একই কোম্পানি দুটোই ব্যবহার করে](#real-world-একই-কমপন-দটই-বযবহর-কর)
+* [Interview: "একটাই কেন বেছে নেবেন না?"](#interview-এ-যদ-জজঞস-কর-একটই-কন-বছ-নবন-ন)
+
+---
+
+## ৯. Interview প্রশ্ন — সব লেভেল
+
+**আলোচ্য বিষয়:**
+
+* [Basic Conceptual Questions](#basic-conceptual-questions)
+* [Exchange Types (খুব common)](#exchange-types-নয-খব-common)
+* [Reliability & Delivery Guarantees](#reliability-delivery-guarantees)
+* [Performance & Scaling](#performance-scaling)
+* [Practical / Scenario-based Questions](#practicalscenario-based-questions)
+* [Comparison Questions](#comparison-questions)
+* [কোড / Implementation Level](#কডimplementation-level-যদ-hands-on-round-থক)
+
+---
+
+## ১০. Advanced ইন্টারভিউ প্রশ্ন-উত্তর (Q1–Q8)
+
+**আলোচ্য বিষয়:**
+
+* [Q1: High Availability কীভাবে নিশ্চিত করে](#q1-rabbitmq-কভব-high-availability-নশচত-কর)
+* [Q2: দুই মেসেজ একই order-এ process নিশ্চিত করা](#q2-দইট-মসজ-একই-order-এ-process-হব-এট-কভব-নশচত-করবন)
+* [Q3: Infinite retry কীভাবে আটকাবেন](#q3-consumer-বরবর-একই-মসজ-process-কর-fail-করছ-infinite-retry-কভব-আটকবন)
+* [Q4: RabbitMQ vs Kafka — কোনটা কখন](#q4-rabbitmq-vs-kafka-কনট-কখন-বছ-নবন-real-scenario-দয)
+* [Q5: RPC pattern implement](#q5-rpc-pattern-rabbitmq-দয-কভব-implement-করবন)
+* [Q6: Message Priority হ্যান্ডলিং](#q6-message-priority-কভব-হযনডল-করবন)
+* [Q7: Queue backlog handle](#q7-একট-queue-ত-হঠৎ-মসজ-জম-যচছ-backlog-বডছ-কভব-handle-করবন)
+* [Q8: Idempotency](#q8-idempotency-কন-দরকর-এব-কভব-implement-করবন)
+
+---
+
+## ১১. Deep-dive Q&A (Q9–Q22)
+
+**আলোচ্য বিষয়:**
+
+* [Q9: Virtual Host (vhost)](#q9-virtual-host-vhost-ক-এব-কন-দরকর)
+* [Q10: Publisher Confirms বনাম Transactions](#q10-publisher-confirms-আর-transactions-পরথকয-ক-কনট-বযবহর-করবন)
+* [Q11: Message TTL (per-queue vs per-message)](#q11-message-ttl-per-queue-vs-per-message-পরথকয-ক)
+* [Q12: Delayed / Scheduled message](#q12-delayed-scheduled-message-কভব-পঠবন-যমন-৩০-মনট-পর-reminder)
+* [Q13: Exactly-once delivery সম্ভব কি](#q13-exactly-once-delivery-ক-rabbitmq-দয-সমভব)
+* [Q14: `basic.reject` বনাম `basic.nack`](#q14-basicreject-আর-basicnack-পরথকয-ক)
+* [Q15: Prefetch-এ `global` flag](#q15-prefetch-এ-global-flag-এর-মন-ক)
+* [Q16: Connection recovery ও heartbeat](#q16-connection-ছড-গল-ক-হয-automatic-recovery-কভব-কজ-কর)
+* [Q17: Memory / Disk alarm](#q17-rabbitmq-ত-memory-disk-alarm-ক)
+* [Q18: Quorum Queue বনাম Classic Queue](#q18-quorum-queue-আর-classic-queue-কখন-কনট)
+* [Q19: Competing Consumers বনাম Pub/Sub](#q19-competing-consumers-আর-pubsub-pattern-এর-পরথকয-rabbitmq-ত-কভব-হয)
+* [Q20: Shovel ও Federation plugin](#q20-shovel-আর-federation-plugin-ক-কজ-লগ)
+* [Q21: Poison message handling](#q21-poison-message-ক-এব-কভব-handle-করবন)
+* [Q22: Production-এ monitoring](#q22-rabbitmq-কভব-monitor-করবন-production-এ)
+
+---
+
+## ১২. Real-World Projects — ১৮টি কেস (কোডসহ)
+
+**আলোচ্য বিষয়:**
+
+* [সমস্যা ১ — Sign-up slow (async publish)](#সমসয-১-sign-up-slow-সব-কজ-synchronously-হচছ)
+* [সমস্যা ২ — Payment double-charge (Idempotency)](#সমসয-২-payment-webhook-দইবর-এস-দইবর-টক-কটছ-idempotency)
+* [সমস্যা ৩ — ব্যাংক transaction ordering](#সমসয-৩-বযক-transaction-এর-order-উলট-যচছ)
+* [সমস্যা ৪ — Newsletter fan-out (work queue)](#সমসয-৪-newsletter-লকষ-ইমইল-মল-অযপ-আটক-যচছ)
+* [সমস্যা ৫ — Video transcode pipeline](#সমসয-৫-video-upload-heavy-processing-এ-ইউজর-wait-করছ)
+* [সমস্যা ৬ — Rate-limit + backoff retry (TTL+DLX)](#সমসয-৬-third-party-api-rate-limit-retry-with-backoff)
+* [সমস্যা ৭ — RPC (reply_to + correlation_id)](#সমসয-৭-order-service-payment-service-synchronous-উততর-দরকর-rpc)
+* [সমস্যা ৮ — Microservices order event (fanout)](#সমসয-৮-e-commerce-microservices-একই-order-event-অনক-টম-লগব)
+* [সমস্যা ৯ — [Ride-Sharing] driver-rider matching](#সমসয-৯-ride-sharing-app-ডরইভর-রইডর-মযচ-ও-লইভ-লকশন)
+* [সমস্যা ১০ — [IoT] sensor telemetry ingestion](#সমসয-১০-iot-platform-লকষ-সনসর-থক-টলমটর-ইনজশন)
+* [সমস্যা ১১ — [Healthcare] critical alert priority](#সমসয-১১-healthcare-system-করটকযল-অযলরট-আগ)
+* [সমস্যা ১২ — [Social Media] feed fan-out](#সমসয-১২-social-media-নটফকশন-ও-ফড-ফযন-আউট)
+* [সমস্যা ১৩ — [Fintech] real-time fraud detection](#সমসয-১৩-fintech-banking-রযল-টইম-ফরড-ডটকশন)
+* [সমস্যা ১৪ — [Logistics] parcel status tracking](#সমসয-১৪-logistics-delivery-পরসল-সটযটস-টরযক)
+* [সমস্যা ১৫ — [E-commerce] flash sale oversell রোধ](#সমসয-১৫-e-commerce-ফলযশ-সল-ইনভনটর-ওভরসল)
+* [সমস্যা ১৬ — [Multi-Region SaaS] replication](#সমসয-১৬-multi-region-saas-ডটসনটরর-মধয-মসজ-রপলকশন)
+* [সমস্যা ১৭ — [Chat] offline message delivery](#সমসয-১৭-chat-messaging-app-অফলইন-মসজ-ডলভর)
+* [সমস্যা ১৮ — [Analytics] scheduled batch jobs](#সমসয-১৮-data-pipeline-analytics-শডউলড-রপরট-ও-বযচ-জব)
 
 ---
 
 ## ১. RabbitMQ কী এবং কেন — Real-life Examples
 
-> RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে।
 RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে। নিচে কিছু real life example দিলাম:
 
 ### ১. Food Delivery App (যেমন Foodpanda/Pathao)
@@ -801,4 +960,201 @@ for (const svc of ['inventory', 'invoice', 'notify', 'analytics']) {
 ch.publish('order.events', '', Buffer.from(JSON.stringify(order)), { persistent: true });
 ```
 
-> **সারমর্ম**: প্রায় সব প্যাটার্নের মূল কথা একটাই — **কাজটাকে queue-তে ফেলে দাও, মূল request দ্রুত ছেড়ে দাও, আর background worker নিজের গতিতে নিরাপদে (durable + ack + retry + DLQ) কাজ শেষ করুক।**
+### সমস্যা ৯ — [Ride-Sharing App] ড্রাইভার-রাইডার ম্যাচিং ও লাইভ লোকেশন
+
+**Project type**: Ride-Hailing Platform (Uber / Pathao / inDrive টাইপ)
+
+**সমস্যা**: রাইড রিকোয়েস্ট এলে আশেপাশের driver খুঁজে notification পাঠাতে হয়, আবার প্রতি সেকেন্ডে হাজার হাজার driver-এর GPS location আপডেট আসে — সব sync করলে API চাপে ভেঙে পড়ে।
+
+**সমাধান**: রাইড ইভেন্টের জন্য **topic exchange** (city/zone অনুযায়ী routing), আর location update-এর জন্য আলাদা high-throughput queue — matching service background-এ কাজ করে।
+
+```js
+await ch.assertExchange('ride', 'topic', { durable: true });
+
+// zone অনুযায়ী শুধু ঐ এলাকার driver-notification service শোনে
+await ch.assertQueue('match.dhaka.uttara', { durable: true });
+await ch.bindQueue('match.dhaka.uttara', 'ride', 'ride.requested.dhaka.uttara');
+
+// rider request → শুধু সংশ্লিষ্ট zone-এ যায় (whole system-এ broadcast নয়)
+ch.publish('ride', `ride.requested.dhaka.uttara`,
+  Buffer.from(JSON.stringify({ riderId, pickup })), { persistent: true });
+```
+
+### সমস্যা ১০ — [IoT Platform] লক্ষ সেন্সর থেকে টেলিমেট্রি ইনজেশন
+
+**Project type**: IoT / Smart Device Telemetry (smart meter, fleet GPS, factory sensor)
+
+**সমস্যা**: লক্ষ লক্ষ device প্রতি কয়েক সেকেন্ডে ছোট ছোট reading পাঠায় (temperature, voltage) — DB-তে সরাসরি লিখলে DB ধসে পড়ে।
+
+**সমাধান**: Device → RabbitMQ → **batch-inserting consumer**। Consumer অনেক message জমিয়ে একবারে bulk insert করে; slow হলে **lazy queue** দিয়ে disk-এ backlog রাখে যাতে RAM overflow না হয়।
+
+```python
+channel.queue_declare('sensor.readings', durable=True,
+    arguments={'x-queue-mode': 'lazy'})   # backlog disk-এ, RAM বাঁচে
+channel.basic_qos(prefetch_count=500)     # একসাথে ৫০০ ধরে batch করি
+
+buffer = []
+def on_msg(ch, method, props, body):
+    buffer.append(json.loads(body))
+    if len(buffer) >= 500:
+        db.bulk_insert(buffer)                       # একবারে ৫০০ row
+        ch.basic_ack(method.delivery_tag, multiple=True)  # batch ack
+        buffer.clear()
+```
+
+### সমস্যা ১১ — [Healthcare System] ক্রিটিক্যাল অ্যালার্ট আগে
+
+**Project type**: Hospital / Patient Monitoring System
+
+**সমস্যা**: রুটিন notification (appointment reminder) আর জীবন-মরণ alert (patient-এর heart rate বিপজ্জনক) একই queue-তে গেলে critical alert পেছনে আটকে যেতে পারে।
+
+**সমাধান**: **Priority queue** — critical মেসেজ সবসময় আগে process হয়।
+
+```python
+channel.queue_declare('alerts', durable=True,
+    arguments={'x-max-priority': 10})     # ০–১০ priority
+
+# critical vital alert → highest priority
+channel.basic_publish('', 'alerts', json.dumps(alert),
+    properties=pika.BasicProperties(priority=10, delivery_mode=2))
+# routine reminder → low priority
+channel.basic_publish('', 'alerts', json.dumps(reminder),
+    properties=pika.BasicProperties(priority=1, delivery_mode=2))
+```
+
+### সমস্যা ১২ — [Social Media] নোটিফিকেশন ও ফিড ফ্যান-আউট
+
+**Project type**: Social Network / Content Platform (Facebook / Instagram টাইপ)
+
+**সমস্যা**: একজন popular user পোস্ট করলে লক্ষ follower-কে notification/feed update দিতে হয় — sync করলে পোস্ট করাই আটকে থাকে ("fan-out on write" problem)।
+
+**সমাধান**: পোস্ট ইভেন্ট একবার publish → **fan-out worker** follower list ভেঙে batch করে আলাদা notification queue-তে জব ফেলে, worker pool ধীরে ধীরে পাঠায়।
+
+```js
+// step 1: post → single event
+ch.publish('post.events', 'post.created',
+  Buffer.from(JSON.stringify({ postId, authorId })), { persistent: true });
+
+// step 2: fan-out worker — follower-দের batch করে notification job বানায়
+ch.consume('post.fanout', async (msg) => {
+  const { postId, authorId } = JSON.parse(msg.content.toString());
+  for (const batch of chunk(await getFollowers(authorId), 1000)) {
+    ch.sendToQueue('notify.push',
+      Buffer.from(JSON.stringify({ postId, userIds: batch })), { persistent: true });
+  }
+  ch.ack(msg);
+});
+```
+
+### সমস্যা ১৩ — [Fintech / Banking] রিয়েল-টাইম ফ্রড ডিটেকশন
+
+**Project type**: Digital Wallet / Fintech (bKash / Nagad টাইপ)
+
+**সমস্যা**: প্রতিটা transaction fraud check করা দরকার, কিন্তু sync ফ্রড-চেক করলে payment slow হয়ে যায়; আবার একই ডেটা fraud + analytics + ledger — সবার লাগে।
+
+**সমাধান**: Transaction event **fanout** — payment মূল ফ্লো চালিয়ে যায়, আর fraud/analytics/ledger service একই event স্বাধীনভাবে consume করে। সন্দেহজনক হলে fraud service আলাদা action queue-তে ফেলে।
+
+```js
+await ch.assertExchange('txn.events', 'fanout', { durable: true });
+for (const svc of ['fraud', 'analytics', 'ledger']) {
+  await ch.assertQueue(`txn.${svc}`, { durable: true });
+  await ch.bindQueue(`txn.${svc}`, 'txn.events', '');
+}
+// payment সফল হওয়ামাত্র event ছাড়ে — তিন service parallel-এ কাজ করে
+ch.publish('txn.events', '', Buffer.from(JSON.stringify(txn)), { persistent: true });
+```
+
+### সমস্যা ১৪ — [Logistics / Delivery] পার্সেল স্ট্যাটাস ট্র্যাকিং
+
+**Project type**: Courier / Last-Mile Delivery (Pathao Courier / Sundarban টাইপ)
+
+**সমস্যা**: পার্সেলের প্রতিটা status change (picked, in-transit, delivered) থেকে customer SMS, dashboard update, partner webhook — সব একসাথে করতে হয়, আর event অবশ্যই order মেনে চলতে হবে (delivered-এর আগে picked)।
+
+**সমাধান**: প্রতিটা parcel-এর event **consistent-hash** দিয়ে একই queue-তে (order রক্ষা), সেখান থেকে fanout করে notification/webhook worker-এ।
+
+```js
+// parcel_id দিয়ে hash → একই পার্সেলের সব event একই shard, order ঠিক
+ch.publish('parcel.status', parcelId,
+  Buffer.from(JSON.stringify({ parcelId, status: 'in_transit', ts: Date.now() })),
+  { persistent: true });
+// webhook fail করলে TTL+DLX দিয়ে retry (সমস্যা ৬-এর মতো backoff)
+```
+
+### সমস্যা ১৫ — [E-commerce] ফ্ল্যাশ সেল / ইনভেন্টরি ওভারসেলিং
+
+**Project type**: E-commerce Marketplace (Daraz Flash Sale টাইপ)
+
+**সমস্যা**: Flash sale-এ এক সেকেন্ডে হাজার অর্ডার আসে; সরাসরি DB-তে stock কমালে race condition-এ একই পণ্য oversell হয়ে যায়।
+
+**সমাধান**: অর্ডারগুলো queue-তে **serialize** করুন — product অনুযায়ী consistent-hash দিয়ে একই product-এর অর্ডার একই consumer-এ, যে stock check + decrement atomically করে।
+
+```js
+// একই productId → একই queue → একটাই consumer stock হ্যান্ডেল করে (no race)
+ch.publish('flashsale', productId,
+  Buffer.from(JSON.stringify({ orderId, productId, qty })), { persistent: true });
+
+ch.consume('flashsale.shard.3', async (msg) => {
+  const { orderId, productId, qty } = JSON.parse(msg.content.toString());
+  if (await decrementStockIfAvailable(productId, qty)) {
+    await confirmOrder(orderId);
+  } else {
+    await rejectOrder(orderId, 'out_of_stock');   // buffer শেষ, কিন্তু crash নয়
+  }
+  ch.ack(msg);
+});
+```
+
+### সমস্যা ১৬ — [Multi-Region SaaS] ডেটাসেন্টারের মধ্যে মেসেজ রিপ্লিকেশন
+
+**Project type**: Global SaaS / Multi-Region Backend
+
+**সমস্যা**: On-prem/একটা region-এ generate হওয়া event আরেকটা region-এর broker-এ পাঠাতে হবে (disaster recovery বা geo-processing-এর জন্য), কিন্তু WAN link অস্থিতিশীল।
+
+**সমাধান**: **Shovel / Federation plugin** দিয়ে broker-to-broker মেসেজ move — কোড না বদলে, শুধু কনফিগ দিয়ে এক broker-এর queue থেকে আরেক broker-এ পাঠানো হয়।
+
+```ini
+# rabbitmq.conf — Shovel: dhaka broker → singapore broker
+shovel.dc_sync.src-uri  = amqp://dhaka-broker
+shovel.dc_sync.src-queue = orders.export
+shovel.dc_sync.dest-uri = amqp://singapore-broker
+shovel.dc_sync.dest-queue = orders.import
+# WAN ছিঁড়ে গেলে source queue-তে জমে থাকে, ফিরলে আবার sync হয় — কিছু হারায় না
+```
+
+### সমস্যা ১৭ — [Chat / Messaging App] অফলাইন মেসেজ ডেলিভারি
+
+**Project type**: Real-Time Chat / Messaging (WhatsApp / Messenger টাইপ)
+
+**সমস্যা**: রিসিভার অফলাইন থাকলে মেসেজ হারানো যাবে না; অনলাইনে ফিরলে ঠিক order-এ সব পেতে হবে।
+
+**সমাধান**: প্রতি user-এর জন্য **durable per-user queue** — receiver অফলাইন থাকলে মেসেজ queue-তে জমা থাকে, reconnect করলে ঠিক order-এ deliver হয় (single consumer per queue → FIFO)।
+
+```js
+// প্রতি user-এর নিজস্ব durable queue — অফলাইনে থাকলেও মেসেজ জমে
+await ch.assertQueue(`user.inbox.${receiverId}`, { durable: true });
+ch.publish('', `user.inbox.${receiverId}`,
+  Buffer.from(JSON.stringify({ from: senderId, text, ts: Date.now() })),
+  { persistent: true });
+// user online → নিজের queue consume করে, ack দিলে তবেই মেসেজ মোছে
+```
+
+### সমস্যা ১৮ — [Data Pipeline / Analytics] শিডিউলড রিপোর্ট ও ব্যাচ জব
+
+**Project type**: BI / Analytics Backend, ETL Pipeline
+
+**সমস্যা**: রাত ২টায় হাজার হাজার merchant-এর জন্য daily report generate করতে হয় — একসাথে চালালে সার্ভার crash করে।
+
+**সমাধান**: Scheduler শুধু প্রতিটা report-এর জন্য একটা job queue-তে ফেলে; worker pool **prefetch** দিয়ে নিয়ন্ত্রিত গতিতে ধীরে ধীরে process করে (natural rate limiting)।
+
+```python
+# cron/scheduler → শুধু job enqueue করে, নিজে ভারী কাজ করে না
+for merchant_id in all_merchants:
+    channel.basic_publish('', 'report.daily',
+        json.dumps({"merchant_id": merchant_id, "date": today}),
+        properties=pika.BasicProperties(delivery_mode=2))
+
+# report worker: prefetch=4 → একসাথে ৪টার বেশি ভারী report চলবে না
+channel.basic_qos(prefetch_count=4)
+```
+
+> **সারমর্ম**: প্রায় সব প্যাটার্নের মূল কথা একটাই — **কাজটাকে queue-তে ফেলে দাও, মূল request দ্রুত ছেড়ে দাও, আর background worker নিজের গতিতে নিরাপদে (durable + ack + retry + DLQ) কাজ শেষ করুক।** শুধু project-এর প্রয়োজন অনুযায়ী প্যাটার্ন বদলায় — order দরকার হলে consistent-hash, broadcast দরকার হলে fanout, নিয়ন্ত্রিত গতি দরকার হলে prefetch, নিরাপত্তা দরকার হলে persistent + confirm + DLQ।
