@@ -1,31 +1,50 @@
-# RabbitMQ — সম্পূর্ণ গাইড
+# 📘 RabbitMQ মাস্টার গাইড
 
 > RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে।
 
-# 📘 RabbitMQ মাস্টার গাইড — কোর্স প্ল্যান
+## 🎯 শেখার রোডম্যাপ — কোনটার পর কোনটা শিখবেন
+
+সবচেয়ে কার্যকর ক্রম: **আগে বেসিক ধারণা → তারপর core mechanics → তারপর production-grade reliability → তারপর comparison → তারপর হাতে-কলমে project → সবশেষে interview revision।** নিচের ধাপগুলো ঠিক এই ক্রমে অনুসরণ করুন।
+
+| ধাপ | Phase | কী শিখবেন | সেকশন |
+|---|---|---|---|
+| ১ | **Basics** (Beginner) | RabbitMQ কী, কেন, আর মূল flow | 1 → 2 → 3 |
+| ২ | **Core Mechanics** | ভেতরের কম্পোনেন্ট ও message ordering | 4 → 5 |
+| ৩ | **Production & Reliability** | High Availability, Quorum vs Mirrored | 6 → 7 |
+| ৪ | **Decision / Comparison** | RabbitMQ কখন, Kafka কখন | 8 |
+| ৫ | **হাতে-কলমে Practice** | ১৮টি বাস্তব project সমস্যা কোডসহ | 9 |
+| ৬ | **Interview Revision** | সব লেভেলের প্রশ্ন + Q1–Q22 | 10 → 11 → 12 |
+
+> **টিপস**: প্রথমবার পড়ার সময় ধাপ ১–৪ ভালোভাবে বুঝে তারপর ধাপ ৫-এ (Real-World Projects) নিজে কোড লিখে দেখুন। ধাপ ৬ (Interview) সবশেষে revision হিসেবে রাখুন — তখন আগের সব ধারণা একসাথে ঝালাই হয়ে যাবে।
+
+---
+
+## 📋 বিস্তারিত সূচিপত্র (আলোচ্য বিষয়সহ)
 
 ## ১. RabbitMQ পরিচিতি ও বাস্তব উদাহরণ
 
 **আলোচ্য বিষয়:**
 
-* [RabbitMQ কী এবং কেন — মূল ধারণা](#১-rabbitmq-ক-এব-কন-real-life-examples)
-* [Food Delivery App (Foodpanda/Pathao)](#১-food-delivery-app-যমন-foodpandapathao)
-* [E-commerce Order Processing (Daraz/Amazon)](#২-e-commerce-order-processing-darazamazon-টইপ)
-* [Video/Image Processing (YouTube)](#৩-videoimage-processing-youtube-টইপ)
+* [RabbitMQ কী এবং কেন — মূল ধারণা](#১-rabbitmq-কী-এবং-কেন--real-life-examples)
+* [Food Delivery App (Foodpanda/Pathao)](#১-food-delivery-app-যেমন-foodpandapathao)
+* [E-commerce Order Processing (Daraz/Amazon)](#২-e-commerce-order-processing-darazamazon-টাইপ)
+* [Video/Image Processing (YouTube)](#৩-videoimage-processing-youtube-টাইপ)
 * [Email/SMS Notification System](#৪-emailsms-notification-system)
 * [Ride-Sharing App (Uber/Pathao)](#৫-ride-sharing-app-uberpathao)
-* [মূল ধারণাটা কী — common pattern](#মল-ধরণট-ক)
+* [মূল ধারণাটা কী — common pattern](#মূল-ধারণাটা-কী)
 
 ---
+
 
 ## ২. কেন RabbitMQ — যে সমস্যা সমাধান করে
 
 **আলোচ্য বিষয়:**
 
-* [Synchronous approach-এর সমস্যা (RabbitMQ ছাড়া)](#২-য-সমসয-সমধন-কর)
-* [Queue দিয়ে asynchronous সমাধান](#২-য-সমসয-সমধন-কর)
+* [Synchronous approach-এর সমস্যা (RabbitMQ ছাড়া)](#২-যে-সমস্যা-সমাধান-করে)
+* [Queue দিয়ে asynchronous সমাধান](#২-যে-সমস্যা-সমাধান-করে)
 
 ---
+
 
 ## ৩. কার্যপ্রণালী — Flow (৫ ধাপ)
 
@@ -39,141 +58,149 @@
 
 ---
 
+
 ## ৪. Internals — ভেতরের মেকানিজম
 
 **আলোচ্য বিষয়:**
 
-* [Connection বনাম Channel](#connection-আর-channel-পরথকয-ক)
-* [Exchange Types (Direct/Fanout/Topic/Headers)](#exchange-types-বসতরত)
-* [Reliability / Durability — মেসেজ কীভাবে হারায় না](#reliability-durability-মসজ-কভব-হরয-ন)
-* [Ack — Manual vs Automatic](#ack-manual-vs-automatic)
-* [Prefetch Count](#prefetch-count-কন-গরতবপরণ)
+* [Connection বনাম Channel](#connection-আর-channel--পার্থক্য-কী)
+* [Exchange Types (Direct/Fanout/Topic/Headers)](#exchange-types--বিস্তারিত)
+* [Reliability / Durability — মেসেজ কীভাবে হারায় না](#reliability--durability--মেসেজ-কীভাবে-হারায়-না)
+* [Ack — Manual vs Automatic](#ack--manual-vs-automatic)
+* [Prefetch Count](#prefetch-count--কেন-গুরুত্বপূর্ণ)
 * [Dead Letter Queue (DLQ)](#dead-letter-queue-dlq)
 
 ---
+
 
 ## ৫. Message Ordering (order guarantee)
 
 **আলোচ্য বিষয়:**
 
-* [Multiple Consumer-এ order কেন ভাঙে](#৫১-কন-multiple-consumer-থকল-order-ভঙ-যয)
-* [সমাধান ১: Routing Key দিয়ে Same Account = Same Queue](#৫২-সমধন-১-routing-key-দয-same-account-same-queue)
-* [সমাধান ২: Single Active Consumer](#৫৩-সমধন-২-single-active-consumer-rabbitmq-built-in-feature)
-* [Real World: ব্যাংক Transaction System ফ্লো](#৫৪-real-world-বযক-transaction-system-বসতরত-ফল)
-* [আরও সহজভাবে — একদম মৌলিক থেকে](#৫৫-আরও-সহজভব-একদম-মলক-থক)
+* [Multiple Consumer-এ order কেন ভাঙে](#৫১-কেন-multiple-consumer-থাকলে-order-ভেঙে-যায়)
+* [সমাধান ১: Routing Key দিয়ে Same Account = Same Queue](#৫২-সমাধান-১-routing-key-দিয়ে-same-account--same-queue)
+* [সমাধান ২: Single Active Consumer](#৫৩-সমাধান-২-single-active-consumer-rabbitmq-built-in-feature)
+* [Real World: ব্যাংক Transaction System ফ্লো](#৫৪-real-world-ব্যাংক-transaction-system--বিস্তারিত-ফ্লো)
+* [আরও সহজভাবে — একদম মৌলিক থেকে](#৫৫-আরও-সহজভাবে--একদম-মৌলিক-থেকে)
 
 ---
+
 
 ## ৬. High Availability (Cluster / Quorum / Raft)
 
 **আলোচ্য বিষয়:**
 
-* [সমস্যা — Single Point of Failure (SPOF)](#পরথম-বঝ-সমসযট-ক)
-* [Cluster কীভাবে কাজ করে](#cluster-কভব-কজ-কর)
-* [Quorum Queue — বিস্তারিত](#quorum-queue-বসতরত)
-* [Raft Consensus Algorithm](#raft-consensus-algorithm-কভব-কজ-কর)
-* [Leader Crash হলে কী হয়](#leader-crash-হল-ক-হয)
-* [Real World উদাহরণ](#real-world-উদহরণ)
-* [Availability বনাম Latency Trade-off](#একট-গরতবপরণ-trade-off-ইনটরভউত-জজঞস-করত-পর)
+* [সমস্যা — Single Point of Failure (SPOF)](#প্রথমে-বুঝি-সমস্যাটা-কী)
+* [Cluster কীভাবে কাজ করে](#cluster-কীভাবে-কাজ-করে)
+* [Quorum Queue — বিস্তারিত](#quorum-queue--বিস্তারিত)
+* [Raft Consensus Algorithm](#raft-consensus-algorithm--কীভাবে-কাজ-করে)
+* [Leader Crash হলে কী হয়](#leader-crash-হলে-কী-হয়)
+* [Real World উদাহরণ](#real-world-উদাহরণ)
+* [Availability বনাম Latency Trade-off](#একটা-গুরুত্বপূর্ণ-trade-off-ইন্টারভিউতে-জিজ্ঞেস-করতে-পারে)
 
 ---
+
 
 ## ৭. Mirrored Queue (Deprecated পদ্ধতি)
 
 **আলোচ্য বিষয়:**
 
-* [Mirrored Queue কীভাবে কাজ করতো](#mirrored-queue-কভব-কজ-করত)
-* [কেন বাদ দেওয়া হলো (split-brain, data loss)](#কন-mirrored-queue-বদ-দওয-হল-মল-সমসযগল)
-* [Quorum Queue কীভাবে সমাধান করলো](#quorum-queue-কভব-এই-সমসযগল-সমধন-করল)
-* [এক লাইনে মূল পার্থক্য](#এক-লইন-মল-পরথকয)
-* [Interview-এ যদি জিজ্ঞেস করে](#interview-এ-যদ-জজঞস-কর)
+* [Mirrored Queue কীভাবে কাজ করতো](#mirrored-queue-কীভাবে-কাজ-করতো)
+* [কেন বাদ দেওয়া হলো (split-brain, data loss)](#কেন-mirrored-queue-বাদ-দেওয়া-হলো--মূল-সমস্যাগুলো)
+* [Quorum Queue কীভাবে সমাধান করলো](#quorum-queue-কীভাবে-এই-সমস্যাগুলো-সমাধান-করলো)
+* [এক লাইনে মূল পার্থক্য](#এক-লাইনে-মূল-পার্থক্য)
+* [Interview-এ যদি জিজ্ঞেস করে](#interview-এ-যদি-জিজ্ঞেস-করে)
 
 ---
+
 
 ## ৮. RabbitMQ বনাম Kafka
 
 **আলোচ্য বিষয়:**
 
-* [মূল আর্কিটেকচারাল পার্থক্য (Queue vs Log model)](#মল-আরকটকচরল-পরথকয-এটই-আসল-করণ)
-* [কেন এই পার্থক্য Use Case নির্ধারণ করে](#কন-এই-পরথকযট-use-case-নরধরণ-কর)
-* [Practical Comparison Table](#একট-practical-comparison-table)
-* [Real World: একই কোম্পানি দুটোই ব্যবহার করে](#real-world-একই-কমপন-দটই-বযবহর-কর)
-* [Interview: "একটাই কেন বেছে নেবেন না?"](#interview-এ-যদ-জজঞস-কর-একটই-কন-বছ-নবন-ন)
+* [মূল আর্কিটেকচারাল পার্থক্য (Queue vs Log model)](#মূল-আর্কিটেকচারাল-পার্থক্য--এটাই-আসল-কারণ)
+* [কেন এই পার্থক্য Use Case নির্ধারণ করে](#কেন-এই-পার্থক্যটা-use-case-নির্ধারণ-করে)
+* [Practical Comparison Table](#একটা-practical-comparison-table)
+* [Real World: একই কোম্পানি দুটোই ব্যবহার করে](#real-world-একই-কোম্পানি-দুটোই-ব্যবহার-করে)
+* [Interview: "একটাই কেন বেছে নেবেন না?"](#interview-এ-যদি-জিজ্ঞেস-করে-একটাই-কেন-বেছে-নেবেন-না)
 
 ---
 
-## ৯. Interview প্রশ্ন — সব লেভেল
+
+## ৯. Real-World Projects — ১৮টি কেস (কোডসহ)
+
+**আলোচ্য বিষয়:**
+
+* [সমস্যা ১ — Sign-up slow (async publish)](#সমস্যা-১-sign-up-slow--সব-কাজ-synchronously-হচ্ছে)
+* [সমস্যা ২ — Payment double-charge (Idempotency)](#সমস্যা-২-payment-webhook-দুইবার-এসে-দুইবার-টাকা-কাটছে-idempotency)
+* [সমস্যা ৩ — ব্যাংক transaction ordering](#সমস্যা-৩-ব্যাংক-transaction-এর-order-উল্টে-যাচ্ছে)
+* [সমস্যা ৪ — Newsletter fan-out (work queue)](#সমস্যা-৪-newsletter--লক্ষ-ইমেইলে-মূল-অ্যাপ-আটকে-যাচ্ছে)
+* [সমস্যা ৫ — Video transcode pipeline](#সমস্যা-৫-video-upload--heavy-processing-এ-ইউজার-wait-করছে)
+* [সমস্যা ৬ — Rate-limit + backoff retry (TTL+DLX)](#সমস্যা-৬-third-party-api-rate-limit--retry-with-backoff)
+* [সমস্যা ৭ — RPC (reply_to + correlation_id)](#সমস্যা-৭-order-service--payment-service-synchronous-উত্তর-দরকার-rpc)
+* [সমস্যা ৮ — Microservices order event (fanout)](#সমস্যা-৮-e-commerce-microservices--একই-order-event-অনেক-টিম-লাগবে)
+* [সমস্যা ৯ — [Ride-Sharing] driver-rider matching](#সমস্যা-৯--ride-sharing-app-ড্রাইভার-রাইডার-ম্যাচিং-ও-লাইভ-লোকেশন)
+* [সমস্যা ১০ — [IoT] sensor telemetry ingestion](#সমস্যা-১০--iot-platform-লক্ষ-সেন্সর-থেকে-টেলিমেট্রি-ইনজেশন)
+* [সমস্যা ১১ — [Healthcare] critical alert priority](#সমস্যা-১১--healthcare-system-ক্রিটিক্যাল-অ্যালার্ট-আগে)
+* [সমস্যা ১২ — [Social Media] feed fan-out](#সমস্যা-১২--social-media-নোটিফিকেশন-ও-ফিড-ফ্যান-আউট)
+* [সমস্যা ১৩ — [Fintech] real-time fraud detection](#সমস্যা-১৩--fintech--banking-রিয়েল-টাইম-ফ্রড-ডিটেকশন)
+* [সমস্যা ১৪ — [Logistics] parcel status tracking](#সমস্যা-১৪--logistics--delivery-পার্সেল-স্ট্যাটাস-ট্র্যাকিং)
+* [সমস্যা ১৫ — [E-commerce] flash sale oversell রোধ](#সমস্যা-১৫--e-commerce-ফ্ল্যাশ-সেল--ইনভেন্টরি-ওভারসেলিং)
+* [সমস্যা ১৬ — [Multi-Region SaaS] replication](#সমস্যা-১৬--multi-region-saas-ডেটাসেন্টারের-মধ্যে-মেসেজ-রিপ্লিকেশন)
+* [সমস্যা ১৭ — [Chat] offline message delivery](#সমস্যা-১৭--chat--messaging-app-অফলাইন-মেসেজ-ডেলিভারি)
+* [সমস্যা ১৮ — [Analytics] scheduled batch jobs](#সমস্যা-১৮--data-pipeline--analytics-শিডিউলড-রিপোর্ট-ও-ব্যাচ-জব)
+
+---
+
+## ১০. Interview প্রশ্ন — সব লেভেল
 
 **আলোচ্য বিষয়:**
 
 * [Basic Conceptual Questions](#basic-conceptual-questions)
-* [Exchange Types (খুব common)](#exchange-types-নয-খব-common)
-* [Reliability & Delivery Guarantees](#reliability-delivery-guarantees)
-* [Performance & Scaling](#performance-scaling)
+* [Exchange Types (খুব common)](#exchange-types-নিয়ে-খুব-common)
+* [Reliability & Delivery Guarantees](#reliability--delivery-guarantees)
+* [Performance & Scaling](#performance--scaling)
 * [Practical / Scenario-based Questions](#practicalscenario-based-questions)
 * [Comparison Questions](#comparison-questions)
-* [কোড / Implementation Level](#কডimplementation-level-যদ-hands-on-round-থক)
+* [কোড / Implementation Level](#কোডimplementation-level-যদি-hands-on-round-থাকে)
 
 ---
 
-## ১০. Advanced ইন্টারভিউ প্রশ্ন-উত্তর (Q1–Q8)
+
+## ১১. Advanced ইন্টারভিউ প্রশ্ন-উত্তর (Q1–Q8)
 
 **আলোচ্য বিষয়:**
 
-* [Q1: High Availability কীভাবে নিশ্চিত করে](#q1-rabbitmq-কভব-high-availability-নশচত-কর)
-* [Q2: দুই মেসেজ একই order-এ process নিশ্চিত করা](#q2-দইট-মসজ-একই-order-এ-process-হব-এট-কভব-নশচত-করবন)
-* [Q3: Infinite retry কীভাবে আটকাবেন](#q3-consumer-বরবর-একই-মসজ-process-কর-fail-করছ-infinite-retry-কভব-আটকবন)
-* [Q4: RabbitMQ vs Kafka — কোনটা কখন](#q4-rabbitmq-vs-kafka-কনট-কখন-বছ-নবন-real-scenario-দয)
-* [Q5: RPC pattern implement](#q5-rpc-pattern-rabbitmq-দয-কভব-implement-করবন)
-* [Q6: Message Priority হ্যান্ডলিং](#q6-message-priority-কভব-হযনডল-করবন)
-* [Q7: Queue backlog handle](#q7-একট-queue-ত-হঠৎ-মসজ-জম-যচছ-backlog-বডছ-কভব-handle-করবন)
-* [Q8: Idempotency](#q8-idempotency-কন-দরকর-এব-কভব-implement-করবন)
+* [Q1: High Availability কীভাবে নিশ্চিত করে](#q1-rabbitmq-কীভাবে-high-availability-নিশ্চিত-করে)
+* [Q2: দুই মেসেজ একই order-এ process নিশ্চিত করা](#q2-দুইটা-মেসেজ-একই-order-এ-process-হবে-এটা-কীভাবে-নিশ্চিত-করবেন)
+* [Q3: Infinite retry কীভাবে আটকাবেন](#q3-consumer-বারবার-একই-মেসেজ-process-করে-fail-করছে--infinite-retry-কীভাবে-আটকাবেন)
+* [Q4: RabbitMQ vs Kafka — কোনটা কখন](#q4-rabbitmq-vs-kafka--কোনটা-কখন-বেছে-নেবেন-real-scenario-দিয়ে)
+* [Q5: RPC pattern implement](#q5-rpc-pattern-rabbitmq-দিয়ে-কীভাবে-implement-করবেন)
+* [Q6: Message Priority হ্যান্ডলিং](#q6-message-priority-কীভাবে-হ্যান্ডেল-করবেন)
+* [Q7: Queue backlog handle](#q7-একটা-queue-তে-হঠাৎ-মেসেজ-জমে-যাচ্ছে-backlog-বাড়ছে--কীভাবে-handle-করবেন)
+* [Q8: Idempotency](#q8-idempotency-কেন-দরকার-এবং-কীভাবে-implement-করবেন)
 
 ---
 
-## ১১. Deep-dive Q&A (Q9–Q22)
+
+## ১২. Deep-dive Q&A (Q9–Q22)
 
 **আলোচ্য বিষয়:**
 
-* [Q9: Virtual Host (vhost)](#q9-virtual-host-vhost-ক-এব-কন-দরকর)
-* [Q10: Publisher Confirms বনাম Transactions](#q10-publisher-confirms-আর-transactions-পরথকয-ক-কনট-বযবহর-করবন)
-* [Q11: Message TTL (per-queue vs per-message)](#q11-message-ttl-per-queue-vs-per-message-পরথকয-ক)
-* [Q12: Delayed / Scheduled message](#q12-delayed-scheduled-message-কভব-পঠবন-যমন-৩০-মনট-পর-reminder)
-* [Q13: Exactly-once delivery সম্ভব কি](#q13-exactly-once-delivery-ক-rabbitmq-দয-সমভব)
-* [Q14: `basic.reject` বনাম `basic.nack`](#q14-basicreject-আর-basicnack-পরথকয-ক)
-* [Q15: Prefetch-এ `global` flag](#q15-prefetch-এ-global-flag-এর-মন-ক)
-* [Q16: Connection recovery ও heartbeat](#q16-connection-ছড-গল-ক-হয-automatic-recovery-কভব-কজ-কর)
-* [Q17: Memory / Disk alarm](#q17-rabbitmq-ত-memory-disk-alarm-ক)
-* [Q18: Quorum Queue বনাম Classic Queue](#q18-quorum-queue-আর-classic-queue-কখন-কনট)
-* [Q19: Competing Consumers বনাম Pub/Sub](#q19-competing-consumers-আর-pubsub-pattern-এর-পরথকয-rabbitmq-ত-কভব-হয)
-* [Q20: Shovel ও Federation plugin](#q20-shovel-আর-federation-plugin-ক-কজ-লগ)
-* [Q21: Poison message handling](#q21-poison-message-ক-এব-কভব-handle-করবন)
-* [Q22: Production-এ monitoring](#q22-rabbitmq-কভব-monitor-করবন-production-এ)
-
----
-
-## ১২. Real-World Projects — ১৮টি কেস (কোডসহ)
-
-**আলোচ্য বিষয়:**
-
-* [সমস্যা ১ — Sign-up slow (async publish)](#সমসয-১-sign-up-slow-সব-কজ-synchronously-হচছ)
-* [সমস্যা ২ — Payment double-charge (Idempotency)](#সমসয-২-payment-webhook-দইবর-এস-দইবর-টক-কটছ-idempotency)
-* [সমস্যা ৩ — ব্যাংক transaction ordering](#সমসয-৩-বযক-transaction-এর-order-উলট-যচছ)
-* [সমস্যা ৪ — Newsletter fan-out (work queue)](#সমসয-৪-newsletter-লকষ-ইমইল-মল-অযপ-আটক-যচছ)
-* [সমস্যা ৫ — Video transcode pipeline](#সমসয-৫-video-upload-heavy-processing-এ-ইউজর-wait-করছ)
-* [সমস্যা ৬ — Rate-limit + backoff retry (TTL+DLX)](#সমসয-৬-third-party-api-rate-limit-retry-with-backoff)
-* [সমস্যা ৭ — RPC (reply_to + correlation_id)](#সমসয-৭-order-service-payment-service-synchronous-উততর-দরকর-rpc)
-* [সমস্যা ৮ — Microservices order event (fanout)](#সমসয-৮-e-commerce-microservices-একই-order-event-অনক-টম-লগব)
-* [সমস্যা ৯ — [Ride-Sharing] driver-rider matching](#সমসয-৯-ride-sharing-app-ডরইভর-রইডর-মযচ-ও-লইভ-লকশন)
-* [সমস্যা ১০ — [IoT] sensor telemetry ingestion](#সমসয-১০-iot-platform-লকষ-সনসর-থক-টলমটর-ইনজশন)
-* [সমস্যা ১১ — [Healthcare] critical alert priority](#সমসয-১১-healthcare-system-করটকযল-অযলরট-আগ)
-* [সমস্যা ১২ — [Social Media] feed fan-out](#সমসয-১২-social-media-নটফকশন-ও-ফড-ফযন-আউট)
-* [সমস্যা ১৩ — [Fintech] real-time fraud detection](#সমসয-১৩-fintech-banking-রযল-টইম-ফরড-ডটকশন)
-* [সমস্যা ১৪ — [Logistics] parcel status tracking](#সমসয-১৪-logistics-delivery-পরসল-সটযটস-টরযক)
-* [সমস্যা ১৫ — [E-commerce] flash sale oversell রোধ](#সমসয-১৫-e-commerce-ফলযশ-সল-ইনভনটর-ওভরসল)
-* [সমস্যা ১৬ — [Multi-Region SaaS] replication](#সমসয-১৬-multi-region-saas-ডটসনটরর-মধয-মসজ-রপলকশন)
-* [সমস্যা ১৭ — [Chat] offline message delivery](#সমসয-১৭-chat-messaging-app-অফলইন-মসজ-ডলভর)
-* [সমস্যা ১৮ — [Analytics] scheduled batch jobs](#সমসয-১৮-data-pipeline-analytics-শডউলড-রপরট-ও-বযচ-জব)
+* [Q9: Virtual Host (vhost)](#q9-virtual-host-vhost-কী-এবং-কেন-দরকার)
+* [Q10: Publisher Confirms বনাম Transactions](#q10-publisher-confirms-আর-transactions--পার্থক্য-কী-কোনটা-ব্যবহার-করবেন)
+* [Q11: Message TTL (per-queue vs per-message)](#q11-message-ttl--per-queue-vs-per-message-পার্থক্য-কী)
+* [Q12: Delayed / Scheduled message](#q12-delayed--scheduled-message-কীভাবে-পাঠাবেন-যেমন-৩০-মিনিট-পর-reminder)
+* [Q13: Exactly-once delivery সম্ভব কি](#q13-exactly-once-delivery-কি-rabbitmq-দিয়ে-সম্ভব)
+* [Q14: `basic.reject` বনাম `basic.nack`](#q14-basicreject-আর-basicnack--পার্থক্য-কী)
+* [Q15: Prefetch-এ `global` flag](#q15-prefetch-এ-global-flag-এর-মানে-কী)
+* [Q16: Connection recovery ও heartbeat](#q16-connection-ছিঁড়ে-গেলে-কী-হয়-automatic-recovery-কীভাবে-কাজ-করে)
+* [Q17: Memory / Disk alarm](#q17-rabbitmq-তে-memory--disk-alarm-কী)
+* [Q18: Quorum Queue বনাম Classic Queue](#q18-quorum-queue-আর-classic-queue--কখন-কোনটা)
+* [Q19: Competing Consumers বনাম Pub/Sub](#q19-competing-consumers-আর-pubsub-pattern-এর-পার্থক্য-rabbitmq-তে-কীভাবে-হয়)
+* [Q20: Shovel ও Federation plugin](#q20-shovel-আর-federation-plugin-কী-কাজে-লাগে)
+* [Q21: Poison message handling](#q21-poison-message-কী-এবং-কীভাবে-handle-করবেন)
+* [Q22: Production-এ monitoring](#q22-rabbitmq-কীভাবে-monitor-করবেন-production-এ)
 
 ---
 
@@ -217,6 +244,7 @@ RabbitMQ হচ্ছে একটা **message broker** — মানে দু
 
 ---
 
+
 ## ২. যে সমস্যা সমাধান করে
 
 RabbitMQ কীভাবে কাজ করে এবং কী সমস্যা সমাধান করে, ধাপে ধাপে বুঝিয়ে দিচ্ছি।
@@ -237,6 +265,7 @@ RabbitMQ কীভাবে কাজ করে এবং কী সমস্য
 **RabbitMQ দিয়ে** — Sign up হওয়ার সাথে সাথে শুধু একটা মেসেজ পাঠিয়ে দেন queue-তে, আর সাথে সাথে user-কে "success" response দিয়ে দেন। বাকি কাজগুলো ব্যাকগ্রাউন্ডে, আলাদা আলাদা service যার যার সময়ে সম্পন্ন করে।
 
 ---
+
 
 ## ৩. কীভাবে কাজ করে — Flow
 
@@ -262,6 +291,7 @@ RabbitMQ কীভাবে কাজ করে এবং কী সমস্য
 এই জন্যই Food delivery বা E-commerce এর example এ বলেছিলাম — একটা service crash করলেও ডেটা হারায় না, শুধু delay হয়।
 
 ---
+
 
 ## ৪. ভেতরের মেকানিজম — Internals
 
@@ -312,6 +342,7 @@ RabbitMQ কীভাবে কাজ করে এবং কী সমস্য
 তখন সেটা মূল Queue থেকে সরে গিয়ে DLQ-তে চলে যায়, যাতে পরে manually inspect করা যায় কেন fail হয়েছিল — মূল Queue আটকে না থেকে।
 
 ---
+
 
 ## ৫. Message Ordering — বিস্তারিত
 
@@ -402,6 +433,7 @@ RabbitMQ-তে `x-single-active-consumer` নামে একটা ফিচ�
 
 ---
 
+
 ## ৬. High Availability — Cluster, Quorum Queue ও Raft
 
 আরও বিস্তারিতভাবে বুঝিয়ে দিচ্ছি RabbitMQ-এর High Availability ব্যাপারটা।
@@ -462,6 +494,7 @@ Quorum Queue এর replication এর কারণে **write latency একট
 
 ---
 
+
 ## ৭. Mirrored Queue — পুরনো ও Deprecated পদ্ধতি
 
 Mirrored Queue নিয়ে বিস্তারিত বুঝিয়ে দিচ্ছি — এটা RabbitMQ-এর পুরনো High Availability পদ্ধতি, যেটা এখন **deprecated** (RabbitMQ 3.13 এ পুরোপুরি সরিয়ে ফেলা হয়েছে, Quorum Queue-ই এখন standard)।
@@ -512,6 +545,7 @@ Master crash করলে যে Mirror নতুন Master হতো, তার
 **"আপনি কেন Mirrored Queue না ব্যবহার করে Quorum Queue ব্যবহার করবেন?"** — এর simple উত্তর: Mirrored Queue-তে formal consensus না থাকায় split-brain আর silent data loss-এর ঝুঁকি ছিল, আর এটা এখন RabbitMQ থেকে সম্পূর্ণ সরিয়েও ফেলা হয়েছে (৩.১৩ ভার্সন থেকে)। তাই নতুন যেকোনো প্রজেক্টে Quorum Queue (বা ছোট non-critical queue-এর জন্য সাধারণ Classic Queue) ব্যবহার করাই standard practice।
 
 ---
+
 
 ## ৮. RabbitMQ vs Kafka
 
@@ -575,187 +609,8 @@ Kafka সম্পূর্ণ ভিন্নভাবে কাজ করে�
 
 ---
 
-## ৯. ইন্টারভিউ প্রশ্ন — সব লেভেল
 
-RabbitMQ ইন্টারভিউতে সাধারণত এই ধরনের প্রশ্ন আসে, লেভেল অনুযায়ী ভাগ করে দিলাম:
-
-### Basic Conceptual Questions
-- RabbitMQ কী, এবং message broker কীভাবে কাজ করে?
-- RabbitMQ vs Kafka — পার্থক্য কী? কোনটা কখন ব্যবহার করবেন?
-- Message Queue ব্যবহার করার সুবিধা কী? (synchronous vs asynchronous communication)
-- **Producer, Consumer, Queue, Exchange, Binding** — এগুলো কী এবং কীভাবে একসাথে কাজ করে?
-- AMQP protocol কী?
-
-### Exchange Types নিয়ে (খুব common)
-- Exchange কত ধরনের হয়? (Direct, Fanout, Topic, Headers) — প্রতিটার difference এবং use case বলতে বলবে
-- উদাহরণস্বরূপ জিজ্ঞেস করতে পারে: "আপনি যদি সব consumer-কে একই মেসেজ broadcast করতে চান, কোন exchange ব্যবহার করবেন?" (উত্তর: Fanout)
-- routing key কীভাবে কাজ করে Direct আর Topic exchange-এ?
-
-### Reliability & Delivery Guarantees
-- Message কীভাবে guarantee করবেন যে হারিয়ে যাবে না? (Persistent messages, durable queues)
-- **Acknowledgement (ack/nack)** কীভাবে কাজ করে? Manual vs automatic ack?
-- Message যদি process করতে গিয়ে consumer crash করে, তাহলে কী হয়?
-- **Dead Letter Queue (DLQ)** কী এবং কেন দরকার?
-- Idempotency নিয়ে প্রশ্ন — একই মেসেজ দুইবার process হলে কীভাবে handle করবেন?
-
-### Performance & Scaling
-- একটা queue-তে অনেক consumer থাকলে load কীভাবে distribute হয়?
-- Prefetch count কী এবং কেন ইম্পরট্যান্ট?
-- High throughput scenario-তে RabbitMQ কীভাবে scale করবেন? (Clustering, sharding queues)
-- Message TTL (Time To Live) কী?
-
-### Practical/Scenario-based Questions
-এগুলো বেশি আসে experienced position-এর জন্য:
-- "একটা অর্ডার প্রসেসিং সিস্টেম ডিজাইন করুন যেখানে RabbitMQ ব্যবহার হবে" — এই ধরনের system design প্রশ্ন
-- "যদি একটা consumer বারবার fail করে একটা মেসেজ process করতে, তাহলে infinite loop এড়াতে কীভাবে handle করবেন?" (Retry limit + DLQ)
-- "কীভাবে নিশ্চিত করবেন যে দুইটা মেসেজ একই order-এ process হবে?"
-- Priority Queue কীভাবে implement করবেন?
-
-### Comparison Questions
-- RabbitMQ vs Kafka vs Redis Pub/Sub — কোনটা কখন?
-  - সংক্ষেপে বলি: **RabbitMQ** — complex routing, guaranteed delivery দরকার হলে ভালো। **Kafka** — high throughput, event streaming, log-based processing দরকার হলে ভালো। **Redis Pub/Sub** — simple, fast, কিন্তু persistence নাই (মেসেজ miss হলে চলে যায়)
-
-### কোড/Implementation Level (যদি hands-on round থাকে)
-- আপনার পছন্দের language-এ (Node.js/Python/Java) RabbitMQ producer-consumer লিখতে বলতে পারে
-- Connection vs Channel — পার্থক্য কী?
-- Error handling কীভাবে করবেন consumer side-এ?
-
----
-
-## ১০. Advanced ইন্টারভিউ প্রশ্ন-উত্তর
-
-আরও কিছু ইন্টারভিউ প্রশ্ন-উত্তর, এবার একটু advanced এবং practical scenario নিয়ে:
-
-### Q1: RabbitMQ কীভাবে High Availability নিশ্চিত করে?
-**উত্তর**: RabbitMQ **Cluster** বানানো যায় — একাধিক নোড একসাথে কাজ করে। একটা নোড ডাউন হলেও বাকি নোড কাজ চালিয়ে যায়। Queue-এর data একাধিক নোডে রাখার জন্য **Quorum Queue** (আগে ছিল Mirrored Queue, এখন deprecated) ব্যবহার হয় — এটা Raft consensus algorithm দিয়ে কাজ করে, তাই একটা নোড crash করলেও ডেটা হারায় না।
-
-### Q2: দুইটা মেসেজ একই order-এ process হবে, এটা কীভাবে নিশ্চিত করবেন?
-**উত্তর**: একটা Queue-তে যদি **একটাই Consumer** থাকে, তাহলে মেসেজ FIFO order-এ আসে। কিন্তু multiple consumer থাকলে order guarantee থাকে না, কারণ একেকটা মেসেজ একেক গতিতে process হয়। Order দরকার হলে সমাধান: একটা related মেসেজ group কে একই Consumer-এর কাছে পাঠানো (Consistent hashing exchange ব্যবহার করে), অথবা single consumer রেখে ভেতরে queue বানানো।
-
-**Real world**: ব্যাংকের transaction system-এ একই account-এর সব transaction অবশ্যই order মেনে process হতে হবে (deposit-এর আগে withdraw হলে সমস্যা), তাই account ID অনুযায়ী routing key ঠিক করে একই queue/consumer-এ পাঠানো হয়।
-
-### Q3: Consumer বারবার একই মেসেজ process করে fail করছে — infinite retry কীভাবে আটকাবেন?
-**উত্তর**: একটা **retry counter** header-এ রাখা হয় মেসেজের সাথে। প্রতিবার fail হলে counter বাড়ে। একটা limit (যেমন ৩ বার) পার হয়ে গেলে মেসেজটা আর requeue না করে **DLQ**-তে পাঠিয়ে দেওয়া হয়, এবং alert পাঠানো হয় যাতে মানুষ ম্যানুয়ালি দেখতে পারে।
-
-### Q4: RabbitMQ vs Kafka — কোনটা কখন বেছে নেবেন? (real scenario দিয়ে)
-- **RabbitMQ**: ব্যাংকের payment processing, অর্ডার প্রসেসিং — যেখানে প্রতিটা মেসেজ নির্দিষ্ট একজন consumer process করবে, guaranteed delivery দরকার, আর complex routing (priority, DLQ) দরকার।
-- **Kafka**: লক্ষ লক্ষ ইউজারের clickstream/activity log, বা IoT sensor data — যেখানে বিশাল throughput দরকার, একই ডেটা একাধিক consumer (analytics, fraud detection, recommendation) একসাথে পড়বে, আর পুরনো ডেটা replay করার দরকার হতে পারে।
-
-### Q5: RPC pattern RabbitMQ দিয়ে কীভাবে implement করবেন?
-**উত্তর**: সাধারণত RabbitMQ fire-and-forget (async), কিন্তু sometimes response দরকার হয় (যেমন request-response)। এর জন্য:
-- Producer একটা মেসেজ পাঠায় সাথে একটা `reply_to` queue name আর `correlation_id` দিয়ে
-- Consumer কাজ শেষ করে সেই `reply_to` queue-তে result পাঠায় একই `correlation_id` সহ
-- Producer সেই correlation_id দিয়ে match করে বুঝে নেয় কোন request-এর response এলো
-
-**Real world**: Microservices architecture-এ, যেমন Order Service, Payment Service-কে জিজ্ঞেস করে "এই কার্ডে টাকা আছে কিনা" এবং সরাসরি response wait করে (synchronous-এর মতো আচরণ, কিন্তু আসলে queue দিয়ে হচ্ছে)।
-
-### Q6: Message Priority কীভাবে হ্যান্ডেল করবেন?
-**উত্তর**: Queue declare করার সময় `x-max-priority` সেট করে priority queue বানানো যায় (০-১০)। মেসেজ পাঠানোর সময় `priority` ফিল্ড সেট করলে বেশি priority-র মেসেজ আগে process হয়।
-
-**Real world**: Hospital-এর emergency notification system — critical alert (patient-এর vital sign খারাপ) সবসময় normal routine notification-এর আগে যাবে।
-
-### Q7: একটা Queue-তে হঠাৎ মেসেজ জমে যাচ্ছে (backlog বাড়ছে) — কীভাবে handle করবেন?
-**উত্তর**:
-- **Horizontal scaling**: আরও consumer instance যোগ করা (competing consumers pattern)
-- Consumer-এর processing logic optimize করা
-- **Alerting** সেট করা যাতে queue length একটা threshold ছাড়ালে জানানো হয়
-- দরকার হলে **auto-scaling** — queue length monitor করে dynamically worker বাড়ানো-কমানো (যেমন Kubernetes HPA দিয়ে)
-
-### Q8: Idempotency কেন দরকার এবং কীভাবে implement করবেন?
-**উত্তর**: RabbitMQ "at-least-once delivery" guarantee দেয় — মানে একই মেসেজ দুইবার (বা তার বেশি) deliver হতে পারে (যেমন consumer ack পাঠানোর ঠিক আগে crash করলে)। তাই Consumer-এর কাজ **idempotent** হতে হবে — একই মেসেজ দুইবার এলেও ফলাফল একই থাকবে।
-
-**Real world**: Payment processing-এ — একই "charge_user" মেসেজ দুইবার এলে যেন ইউজারের কার্ড থেকে দুইবার টাকা না কাটে। সমাধান: প্রতিটা মেসেজের সাথে একটা unique transaction ID পাঠানো, এবং process করার আগে check করা এই ID আগে process হয়েছে কিনা (database-এ record রেখে)।
-
----
-
-## ১১. আরও গভীর ইন্টারভিউ প্রশ্ন-উত্তর (Q9–Q22)
-
-এই প্রশ্নগুলো mid থেকে senior লেভেলের ইন্টারভিউতে বেশি আসে — architecture, edge case আর operational দিক নিয়ে।
-
-### Q9: Virtual Host (vhost) কী এবং কেন দরকার?
-**উত্তর**: vhost হলো একটা RabbitMQ সার্ভারের ভেতরে **logical isolation** — প্রতিটা vhost-এর নিজস্ব আলাদা exchange, queue, binding আর permission থাকে। একটা vhost-এর queue অন্য vhost থেকে দেখা যায় না।
-
-**কেন দরকার**: একই RabbitMQ cluster-এ multiple team বা multiple environment (dev/staging/prod) চালাতে চাইলে vhost দিয়ে আলাদা করা হয় — যাতে একটার queue আরেকটার সাথে conflict না করে। যেমন `/payments` vhost আর `/notifications` vhost সম্পূর্ণ আলাদা।
-
-### Q10: Publisher Confirms আর Transactions — পার্থক্য কী? কোনটা ব্যবহার করবেন?
-**উত্তর**:
-- **Transactions (`tx.select`/`tx.commit`)**: প্রতিটা publish একটা transaction-এ মোড়ানো হয়, commit না করা পর্যন্ত মেসেজ pending থাকে। এটা **খুব slow** (প্রতিটা commit-এ round-trip লাগে)।
-- **Publisher Confirms**: Producer async-ভাবে publish করতে থাকে, RabbitMQ প্রতিটা মেসেজের জন্য পরে একটা `ack` (বা `nack`) পাঠায়। অনেক দ্রুত, কারণ batch/pipeline করা যায়।
-
-**Best practice**: reliability দরকার হলে Publisher Confirms ব্যবহার করুন, transaction নয় — ১০x+ বেশি throughput পাওয়া যায়।
-
-### Q11: Message TTL — per-queue vs per-message পার্থক্য কী?
-**উত্তর**:
-- **Per-queue TTL** (`x-message-ttl` queue argument): ওই queue-এর সব মেসেজের জন্য একই expiry।
-- **Per-message TTL** (`expiration` property): প্রতিটা মেসেজে আলাদা করে সময় সেট করা যায়।
-
-**সূক্ষ্ম ব্যাপার**: RabbitMQ শুধু queue-এর **head**-এর মেসেজ expire হয়েছে কিনা চেক করে। তাই per-message TTL-এ পেছনের মেসেজ আগে expire হলেও, সামনের মেসেজ না সরা পর্যন্ত সেটা delete হয় না — এটা interview-এ tricky follow-up।
-
-### Q12: Delayed / Scheduled message কীভাবে পাঠাবেন? (যেমন "৩০ মিনিট পর reminder")
-**উত্তর**: দুইটা উপায়:
-1. **Dead Letter + TTL trick**: একটা "delay queue" বানান যার consumer নেই, `x-message-ttl` সেট করা, আর `x-dead-letter-exchange` মূল queue-এ point করা। মেসেজ TTL শেষে DLX দিয়ে আসল queue-তে চলে আসে।
-2. **`rabbitmq-delayed-message-exchange` plugin**: এটাই cleaner — মেসেজে `x-delay` header দিলে exchange নিজেই ওই সময় পর্যন্ত ধরে রাখে।
-
-**Real world**: abandoned cart email (৩০ মিনিট পর), subscription renewal reminder, retry with backoff।
-
-### Q13: Exactly-once delivery কি RabbitMQ দিয়ে সম্ভব?
-**উত্তর**: কড়া অর্থে **না**। RabbitMQ **at-least-once** দেয় (network fail, redelivery-র কারণে duplicate আসতে পারে)। "Exactly-once processing" বাস্তবে অর্জন করা হয় **at-least-once delivery + idempotent consumer** দিয়ে — অর্থাৎ duplicate এলেও consumer একই ফল দেয় (dedup key/DB check দিয়ে)। এটা একটা খুব common "gotcha" প্রশ্ন।
-
-### Q14: `basic.reject` আর `basic.nack` — পার্থক্য কী?
-**উত্তর**: দুটোই মেসেজ reject করে, কিন্তু:
-- `basic.reject` — একবারে **একটা** মেসেজ reject করতে পারে।
-- `basic.nack` — RabbitMQ-এর extension, `multiple: true` দিয়ে **একসাথে অনেক** মেসেজ reject করা যায়।
-
-দুটোতেই `requeue` ফ্ল্যাগ আছে — `requeue=false` দিলে মেসেজ DLQ-তে যায় (থাকলে), নাহলে drop হয়।
-
-### Q15: Prefetch-এ `global` flag-এর মানে কী?
-**উত্তর**: `basic.qos`-এ prefetch count দুইভাবে কাজ করে:
-- **per-consumer** (default): প্রতিটা consumer আলাদাভাবে সর্বোচ্চ N মেসেজ পায়।
-- **global=true**: পুরো **channel**-এর জন্য সম্মিলিতভাবে সর্বোচ্চ N।
-
-সাধারণত per-consumer prefetch-ই চাই, যাতে fast consumer বেশি কাজ পায় আর slow consumer কম — **fair dispatch**।
-
-### Q16: Connection ছিঁড়ে গেলে কী হয়? Automatic recovery কীভাবে কাজ করে?
-**উত্তর**: Network glitch-এ connection/channel বন্ধ হয়ে যেতে পারে। বেশিরভাগ client library-তে **automatic connection recovery** থাকে — connection ফিরে এলে channel, queue, binding, consumer আবার নিজে থেকে declare করে নেয়। সাথে **heartbeat** (default ৬০ সেকেন্ড) দিয়ে RabbitMQ আর client পরস্পরকে "জীবিত আছি" জানায়; heartbeat miss হলে connection dead ধরে নেওয়া হয়।
-
-**গুরুত্বপূর্ণ**: recovery-র সময় unacked মেসেজ redeliver হবে — তাই আবারও consumer idempotent হওয়া লাগে।
-
-### Q17: RabbitMQ-তে Memory / Disk alarm কী?
-**উত্তর**: RabbitMQ একটা **flow control** ব্যবস্থা — যখন RAM ব্যবহার একটা threshold (`vm_memory_high_watermark`, default ৪০%) ছাড়ায় বা free disk কমে যায়, তখন সে **publisher-দের block** করে দেয় (নতুন মেসেজ নেওয়া থামিয়ে দেয়), যাতে সার্ভার crash না করে। Consumer কাজ চালিয়ে যায়, backlog কমলে আবার publisher খুলে যায়। Production issue debug করতে এটা জানা জরুরি।
-
-### Q18: Quorum Queue আর Classic Queue — কখন কোনটা?
-**উত্তর**:
-- **Quorum Queue**: data safety + HA দরকার (payment, order) — Raft দিয়ে replicated, no data loss।
-- **Classic Queue**: non-critical, ephemeral, বা খুব high-throughput temporary কাজ (যেমন per-client RPC reply queue) — হালকা, কিন্তু single-node, replicate হয় না।
-
-Mirrored (HA classic) queue এখন deprecated — নতুন প্রজেক্টে HA লাগলে Quorum।
-
-### Q19: Competing Consumers আর Pub/Sub pattern-এর পার্থক্য RabbitMQ-তে কীভাবে হয়?
-**উত্তর**:
-- **Competing Consumers (work queue)**: একটা queue, অনেক consumer — প্রতিটা মেসেজ **একজনই** পায় (load sharing)। Default direct/queue behavior।
-- **Pub/Sub (fanout)**: fanout exchange-এ একাধিক queue bind করা, প্রতিটা queue-র নিজস্ব consumer — একই মেসেজ **সবাই** পায় (broadcast)।
-
-মূল কৌশল: "মেসেজ একজন নেবে" চাইলে এক queue শেয়ার করান; "সবাই নেবে" চাইলে প্রত্যেকের আলাদা queue বানান।
-
-### Q20: Shovel আর Federation plugin কী কাজে লাগে?
-**উত্তর**: দুটোই **broker-to-broker** মেসেজ move করার জন্য (যেমন এক datacenter থেকে আরেকটায়):
-- **Shovel**: এক queue থেকে মেসেজ টেনে অন্য broker-এর exchange/queue-তে পাঠায় — point-to-point, সহজ কনফিগ।
-- **Federation**: exchange/queue level-এ link — একাধিক broker-জুড়ে মেসেজ শেয়ার, WAN-friendly (loose coupling)।
-
-**Use case**: multi-region deployment, on-prem থেকে cloud-এ migration, geo-distributed system।
-
-### Q21: Poison message কী এবং কীভাবে handle করবেন?
-**উত্তর**: যে মেসেজ কখনোই সফলভাবে process হয় না (malformed data, permanent bug) — বারবার fail করে requeue হয়ে queue আটকে দেয়, এটাই **poison message**। সমাধান: `x-death` header দিয়ে retry count track করা, নির্দিষ্ট সংখ্যক fail-এর পর **DLQ**-তে সরিয়ে দেওয়া এবং alert তোলা — মূল pipeline সচল রাখা।
-
-### Q22: RabbitMQ কীভাবে monitor করবেন production-এ?
-**উত্তর**:
-- **Management Plugin** (web UI + HTTP API): queue depth, message rate, consumer count, memory।
-- **Prometheus + Grafana**: `rabbitmq_prometheus` plugin দিয়ে metrics scrape করে dashboard/alert।
-- মূল যে metric-গুলো watch করবেন: **queue length (backlog)**, **unacked message count**, **consumer utilisation**, **memory/disk alarm**, **redelivery rate**।
-
----
-
-## ১২. Real-World Project — সমস্যা ও সমাধান (কোডসহ)
+## ৯. Real-World Project — সমস্যা ও সমাধান (কোডসহ)
 
 এই সেকশনে কয়েকটা বাস্তব প্রজেক্ট সমস্যা, আর RabbitMQ দিয়ে কীভাবে সেগুলো সমাধান করা হয় — practical কোড (Node.js `amqplib` / Python `pika`) সহ দেখানো হলো।
 
@@ -1158,3 +1013,186 @@ channel.basic_qos(prefetch_count=4)
 ```
 
 > **সারমর্ম**: প্রায় সব প্যাটার্নের মূল কথা একটাই — **কাজটাকে queue-তে ফেলে দাও, মূল request দ্রুত ছেড়ে দাও, আর background worker নিজের গতিতে নিরাপদে (durable + ack + retry + DLQ) কাজ শেষ করুক।** শুধু project-এর প্রয়োজন অনুযায়ী প্যাটার্ন বদলায় — order দরকার হলে consistent-hash, broadcast দরকার হলে fanout, নিয়ন্ত্রিত গতি দরকার হলে prefetch, নিরাপত্তা দরকার হলে persistent + confirm + DLQ।
+
+## ১০. ইন্টারভিউ প্রশ্ন — সব লেভেল
+
+RabbitMQ ইন্টারভিউতে সাধারণত এই ধরনের প্রশ্ন আসে, লেভেল অনুযায়ী ভাগ করে দিলাম:
+
+### Basic Conceptual Questions
+- RabbitMQ কী, এবং message broker কীভাবে কাজ করে?
+- RabbitMQ vs Kafka — পার্থক্য কী? কোনটা কখন ব্যবহার করবেন?
+- Message Queue ব্যবহার করার সুবিধা কী? (synchronous vs asynchronous communication)
+- **Producer, Consumer, Queue, Exchange, Binding** — এগুলো কী এবং কীভাবে একসাথে কাজ করে?
+- AMQP protocol কী?
+
+### Exchange Types নিয়ে (খুব common)
+- Exchange কত ধরনের হয়? (Direct, Fanout, Topic, Headers) — প্রতিটার difference এবং use case বলতে বলবে
+- উদাহরণস্বরূপ জিজ্ঞেস করতে পারে: "আপনি যদি সব consumer-কে একই মেসেজ broadcast করতে চান, কোন exchange ব্যবহার করবেন?" (উত্তর: Fanout)
+- routing key কীভাবে কাজ করে Direct আর Topic exchange-এ?
+
+### Reliability & Delivery Guarantees
+- Message কীভাবে guarantee করবেন যে হারিয়ে যাবে না? (Persistent messages, durable queues)
+- **Acknowledgement (ack/nack)** কীভাবে কাজ করে? Manual vs automatic ack?
+- Message যদি process করতে গিয়ে consumer crash করে, তাহলে কী হয়?
+- **Dead Letter Queue (DLQ)** কী এবং কেন দরকার?
+- Idempotency নিয়ে প্রশ্ন — একই মেসেজ দুইবার process হলে কীভাবে handle করবেন?
+
+### Performance & Scaling
+- একটা queue-তে অনেক consumer থাকলে load কীভাবে distribute হয়?
+- Prefetch count কী এবং কেন ইম্পরট্যান্ট?
+- High throughput scenario-তে RabbitMQ কীভাবে scale করবেন? (Clustering, sharding queues)
+- Message TTL (Time To Live) কী?
+
+### Practical/Scenario-based Questions
+এগুলো বেশি আসে experienced position-এর জন্য:
+- "একটা অর্ডার প্রসেসিং সিস্টেম ডিজাইন করুন যেখানে RabbitMQ ব্যবহার হবে" — এই ধরনের system design প্রশ্ন
+- "যদি একটা consumer বারবার fail করে একটা মেসেজ process করতে, তাহলে infinite loop এড়াতে কীভাবে handle করবেন?" (Retry limit + DLQ)
+- "কীভাবে নিশ্চিত করবেন যে দুইটা মেসেজ একই order-এ process হবে?"
+- Priority Queue কীভাবে implement করবেন?
+
+### Comparison Questions
+- RabbitMQ vs Kafka vs Redis Pub/Sub — কোনটা কখন?
+  - সংক্ষেপে বলি: **RabbitMQ** — complex routing, guaranteed delivery দরকার হলে ভালো। **Kafka** — high throughput, event streaming, log-based processing দরকার হলে ভালো। **Redis Pub/Sub** — simple, fast, কিন্তু persistence নাই (মেসেজ miss হলে চলে যায়)
+
+### কোড/Implementation Level (যদি hands-on round থাকে)
+- আপনার পছন্দের language-এ (Node.js/Python/Java) RabbitMQ producer-consumer লিখতে বলতে পারে
+- Connection vs Channel — পার্থক্য কী?
+- Error handling কীভাবে করবেন consumer side-এ?
+
+---
+
+
+## ১১. Advanced ইন্টারভিউ প্রশ্ন-উত্তর
+
+আরও কিছু ইন্টারভিউ প্রশ্ন-উত্তর, এবার একটু advanced এবং practical scenario নিয়ে:
+
+### Q1: RabbitMQ কীভাবে High Availability নিশ্চিত করে?
+**উত্তর**: RabbitMQ **Cluster** বানানো যায় — একাধিক নোড একসাথে কাজ করে। একটা নোড ডাউন হলেও বাকি নোড কাজ চালিয়ে যায়। Queue-এর data একাধিক নোডে রাখার জন্য **Quorum Queue** (আগে ছিল Mirrored Queue, এখন deprecated) ব্যবহার হয় — এটা Raft consensus algorithm দিয়ে কাজ করে, তাই একটা নোড crash করলেও ডেটা হারায় না।
+
+### Q2: দুইটা মেসেজ একই order-এ process হবে, এটা কীভাবে নিশ্চিত করবেন?
+**উত্তর**: একটা Queue-তে যদি **একটাই Consumer** থাকে, তাহলে মেসেজ FIFO order-এ আসে। কিন্তু multiple consumer থাকলে order guarantee থাকে না, কারণ একেকটা মেসেজ একেক গতিতে process হয়। Order দরকার হলে সমাধান: একটা related মেসেজ group কে একই Consumer-এর কাছে পাঠানো (Consistent hashing exchange ব্যবহার করে), অথবা single consumer রেখে ভেতরে queue বানানো।
+
+**Real world**: ব্যাংকের transaction system-এ একই account-এর সব transaction অবশ্যই order মেনে process হতে হবে (deposit-এর আগে withdraw হলে সমস্যা), তাই account ID অনুযায়ী routing key ঠিক করে একই queue/consumer-এ পাঠানো হয়।
+
+### Q3: Consumer বারবার একই মেসেজ process করে fail করছে — infinite retry কীভাবে আটকাবেন?
+**উত্তর**: একটা **retry counter** header-এ রাখা হয় মেসেজের সাথে। প্রতিবার fail হলে counter বাড়ে। একটা limit (যেমন ৩ বার) পার হয়ে গেলে মেসেজটা আর requeue না করে **DLQ**-তে পাঠিয়ে দেওয়া হয়, এবং alert পাঠানো হয় যাতে মানুষ ম্যানুয়ালি দেখতে পারে।
+
+### Q4: RabbitMQ vs Kafka — কোনটা কখন বেছে নেবেন? (real scenario দিয়ে)
+- **RabbitMQ**: ব্যাংকের payment processing, অর্ডার প্রসেসিং — যেখানে প্রতিটা মেসেজ নির্দিষ্ট একজন consumer process করবে, guaranteed delivery দরকার, আর complex routing (priority, DLQ) দরকার।
+- **Kafka**: লক্ষ লক্ষ ইউজারের clickstream/activity log, বা IoT sensor data — যেখানে বিশাল throughput দরকার, একই ডেটা একাধিক consumer (analytics, fraud detection, recommendation) একসাথে পড়বে, আর পুরনো ডেটা replay করার দরকার হতে পারে।
+
+### Q5: RPC pattern RabbitMQ দিয়ে কীভাবে implement করবেন?
+**উত্তর**: সাধারণত RabbitMQ fire-and-forget (async), কিন্তু sometimes response দরকার হয় (যেমন request-response)। এর জন্য:
+- Producer একটা মেসেজ পাঠায় সাথে একটা `reply_to` queue name আর `correlation_id` দিয়ে
+- Consumer কাজ শেষ করে সেই `reply_to` queue-তে result পাঠায় একই `correlation_id` সহ
+- Producer সেই correlation_id দিয়ে match করে বুঝে নেয় কোন request-এর response এলো
+
+**Real world**: Microservices architecture-এ, যেমন Order Service, Payment Service-কে জিজ্ঞেস করে "এই কার্ডে টাকা আছে কিনা" এবং সরাসরি response wait করে (synchronous-এর মতো আচরণ, কিন্তু আসলে queue দিয়ে হচ্ছে)।
+
+### Q6: Message Priority কীভাবে হ্যান্ডেল করবেন?
+**উত্তর**: Queue declare করার সময় `x-max-priority` সেট করে priority queue বানানো যায় (০-১০)। মেসেজ পাঠানোর সময় `priority` ফিল্ড সেট করলে বেশি priority-র মেসেজ আগে process হয়।
+
+**Real world**: Hospital-এর emergency notification system — critical alert (patient-এর vital sign খারাপ) সবসময় normal routine notification-এর আগে যাবে।
+
+### Q7: একটা Queue-তে হঠাৎ মেসেজ জমে যাচ্ছে (backlog বাড়ছে) — কীভাবে handle করবেন?
+**উত্তর**:
+- **Horizontal scaling**: আরও consumer instance যোগ করা (competing consumers pattern)
+- Consumer-এর processing logic optimize করা
+- **Alerting** সেট করা যাতে queue length একটা threshold ছাড়ালে জানানো হয়
+- দরকার হলে **auto-scaling** — queue length monitor করে dynamically worker বাড়ানো-কমানো (যেমন Kubernetes HPA দিয়ে)
+
+### Q8: Idempotency কেন দরকার এবং কীভাবে implement করবেন?
+**উত্তর**: RabbitMQ "at-least-once delivery" guarantee দেয় — মানে একই মেসেজ দুইবার (বা তার বেশি) deliver হতে পারে (যেমন consumer ack পাঠানোর ঠিক আগে crash করলে)। তাই Consumer-এর কাজ **idempotent** হতে হবে — একই মেসেজ দুইবার এলেও ফলাফল একই থাকবে।
+
+**Real world**: Payment processing-এ — একই "charge_user" মেসেজ দুইবার এলে যেন ইউজারের কার্ড থেকে দুইবার টাকা না কাটে। সমাধান: প্রতিটা মেসেজের সাথে একটা unique transaction ID পাঠানো, এবং process করার আগে check করা এই ID আগে process হয়েছে কিনা (database-এ record রেখে)।
+
+---
+
+
+## ১২. আরও গভীর ইন্টারভিউ প্রশ্ন-উত্তর (Q9–Q22)
+
+এই প্রশ্নগুলো mid থেকে senior লেভেলের ইন্টারভিউতে বেশি আসে — architecture, edge case আর operational দিক নিয়ে।
+
+### Q9: Virtual Host (vhost) কী এবং কেন দরকার?
+**উত্তর**: vhost হলো একটা RabbitMQ সার্ভারের ভেতরে **logical isolation** — প্রতিটা vhost-এর নিজস্ব আলাদা exchange, queue, binding আর permission থাকে। একটা vhost-এর queue অন্য vhost থেকে দেখা যায় না।
+
+**কেন দরকার**: একই RabbitMQ cluster-এ multiple team বা multiple environment (dev/staging/prod) চালাতে চাইলে vhost দিয়ে আলাদা করা হয় — যাতে একটার queue আরেকটার সাথে conflict না করে। যেমন `/payments` vhost আর `/notifications` vhost সম্পূর্ণ আলাদা।
+
+### Q10: Publisher Confirms আর Transactions — পার্থক্য কী? কোনটা ব্যবহার করবেন?
+**উত্তর**:
+- **Transactions (`tx.select`/`tx.commit`)**: প্রতিটা publish একটা transaction-এ মোড়ানো হয়, commit না করা পর্যন্ত মেসেজ pending থাকে। এটা **খুব slow** (প্রতিটা commit-এ round-trip লাগে)।
+- **Publisher Confirms**: Producer async-ভাবে publish করতে থাকে, RabbitMQ প্রতিটা মেসেজের জন্য পরে একটা `ack` (বা `nack`) পাঠায়। অনেক দ্রুত, কারণ batch/pipeline করা যায়।
+
+**Best practice**: reliability দরকার হলে Publisher Confirms ব্যবহার করুন, transaction নয় — ১০x+ বেশি throughput পাওয়া যায়।
+
+### Q11: Message TTL — per-queue vs per-message পার্থক্য কী?
+**উত্তর**:
+- **Per-queue TTL** (`x-message-ttl` queue argument): ওই queue-এর সব মেসেজের জন্য একই expiry।
+- **Per-message TTL** (`expiration` property): প্রতিটা মেসেজে আলাদা করে সময় সেট করা যায়।
+
+**সূক্ষ্ম ব্যাপার**: RabbitMQ শুধু queue-এর **head**-এর মেসেজ expire হয়েছে কিনা চেক করে। তাই per-message TTL-এ পেছনের মেসেজ আগে expire হলেও, সামনের মেসেজ না সরা পর্যন্ত সেটা delete হয় না — এটা interview-এ tricky follow-up।
+
+### Q12: Delayed / Scheduled message কীভাবে পাঠাবেন? (যেমন "৩০ মিনিট পর reminder")
+**উত্তর**: দুইটা উপায়:
+1. **Dead Letter + TTL trick**: একটা "delay queue" বানান যার consumer নেই, `x-message-ttl` সেট করা, আর `x-dead-letter-exchange` মূল queue-এ point করা। মেসেজ TTL শেষে DLX দিয়ে আসল queue-তে চলে আসে।
+2. **`rabbitmq-delayed-message-exchange` plugin**: এটাই cleaner — মেসেজে `x-delay` header দিলে exchange নিজেই ওই সময় পর্যন্ত ধরে রাখে।
+
+**Real world**: abandoned cart email (৩০ মিনিট পর), subscription renewal reminder, retry with backoff।
+
+### Q13: Exactly-once delivery কি RabbitMQ দিয়ে সম্ভব?
+**উত্তর**: কড়া অর্থে **না**। RabbitMQ **at-least-once** দেয় (network fail, redelivery-র কারণে duplicate আসতে পারে)। "Exactly-once processing" বাস্তবে অর্জন করা হয় **at-least-once delivery + idempotent consumer** দিয়ে — অর্থাৎ duplicate এলেও consumer একই ফল দেয় (dedup key/DB check দিয়ে)। এটা একটা খুব common "gotcha" প্রশ্ন।
+
+### Q14: `basic.reject` আর `basic.nack` — পার্থক্য কী?
+**উত্তর**: দুটোই মেসেজ reject করে, কিন্তু:
+- `basic.reject` — একবারে **একটা** মেসেজ reject করতে পারে।
+- `basic.nack` — RabbitMQ-এর extension, `multiple: true` দিয়ে **একসাথে অনেক** মেসেজ reject করা যায়।
+
+দুটোতেই `requeue` ফ্ল্যাগ আছে — `requeue=false` দিলে মেসেজ DLQ-তে যায় (থাকলে), নাহলে drop হয়।
+
+### Q15: Prefetch-এ `global` flag-এর মানে কী?
+**উত্তর**: `basic.qos`-এ prefetch count দুইভাবে কাজ করে:
+- **per-consumer** (default): প্রতিটা consumer আলাদাভাবে সর্বোচ্চ N মেসেজ পায়।
+- **global=true**: পুরো **channel**-এর জন্য সম্মিলিতভাবে সর্বোচ্চ N।
+
+সাধারণত per-consumer prefetch-ই চাই, যাতে fast consumer বেশি কাজ পায় আর slow consumer কম — **fair dispatch**।
+
+### Q16: Connection ছিঁড়ে গেলে কী হয়? Automatic recovery কীভাবে কাজ করে?
+**উত্তর**: Network glitch-এ connection/channel বন্ধ হয়ে যেতে পারে। বেশিরভাগ client library-তে **automatic connection recovery** থাকে — connection ফিরে এলে channel, queue, binding, consumer আবার নিজে থেকে declare করে নেয়। সাথে **heartbeat** (default ৬০ সেকেন্ড) দিয়ে RabbitMQ আর client পরস্পরকে "জীবিত আছি" জানায়; heartbeat miss হলে connection dead ধরে নেওয়া হয়।
+
+**গুরুত্বপূর্ণ**: recovery-র সময় unacked মেসেজ redeliver হবে — তাই আবারও consumer idempotent হওয়া লাগে।
+
+### Q17: RabbitMQ-তে Memory / Disk alarm কী?
+**উত্তর**: RabbitMQ একটা **flow control** ব্যবস্থা — যখন RAM ব্যবহার একটা threshold (`vm_memory_high_watermark`, default ৪০%) ছাড়ায় বা free disk কমে যায়, তখন সে **publisher-দের block** করে দেয় (নতুন মেসেজ নেওয়া থামিয়ে দেয়), যাতে সার্ভার crash না করে। Consumer কাজ চালিয়ে যায়, backlog কমলে আবার publisher খুলে যায়। Production issue debug করতে এটা জানা জরুরি।
+
+### Q18: Quorum Queue আর Classic Queue — কখন কোনটা?
+**উত্তর**:
+- **Quorum Queue**: data safety + HA দরকার (payment, order) — Raft দিয়ে replicated, no data loss।
+- **Classic Queue**: non-critical, ephemeral, বা খুব high-throughput temporary কাজ (যেমন per-client RPC reply queue) — হালকা, কিন্তু single-node, replicate হয় না।
+
+Mirrored (HA classic) queue এখন deprecated — নতুন প্রজেক্টে HA লাগলে Quorum।
+
+### Q19: Competing Consumers আর Pub/Sub pattern-এর পার্থক্য RabbitMQ-তে কীভাবে হয়?
+**উত্তর**:
+- **Competing Consumers (work queue)**: একটা queue, অনেক consumer — প্রতিটা মেসেজ **একজনই** পায় (load sharing)। Default direct/queue behavior।
+- **Pub/Sub (fanout)**: fanout exchange-এ একাধিক queue bind করা, প্রতিটা queue-র নিজস্ব consumer — একই মেসেজ **সবাই** পায় (broadcast)।
+
+মূল কৌশল: "মেসেজ একজন নেবে" চাইলে এক queue শেয়ার করান; "সবাই নেবে" চাইলে প্রত্যেকের আলাদা queue বানান।
+
+### Q20: Shovel আর Federation plugin কী কাজে লাগে?
+**উত্তর**: দুটোই **broker-to-broker** মেসেজ move করার জন্য (যেমন এক datacenter থেকে আরেকটায়):
+- **Shovel**: এক queue থেকে মেসেজ টেনে অন্য broker-এর exchange/queue-তে পাঠায় — point-to-point, সহজ কনফিগ।
+- **Federation**: exchange/queue level-এ link — একাধিক broker-জুড়ে মেসেজ শেয়ার, WAN-friendly (loose coupling)।
+
+**Use case**: multi-region deployment, on-prem থেকে cloud-এ migration, geo-distributed system।
+
+### Q21: Poison message কী এবং কীভাবে handle করবেন?
+**উত্তর**: যে মেসেজ কখনোই সফলভাবে process হয় না (malformed data, permanent bug) — বারবার fail করে requeue হয়ে queue আটকে দেয়, এটাই **poison message**। সমাধান: `x-death` header দিয়ে retry count track করা, নির্দিষ্ট সংখ্যক fail-এর পর **DLQ**-তে সরিয়ে দেওয়া এবং alert তোলা — মূল pipeline সচল রাখা।
+
+### Q22: RabbitMQ কীভাবে monitor করবেন production-এ?
+**উত্তর**:
+- **Management Plugin** (web UI + HTTP API): queue depth, message rate, consumer count, memory।
+- **Prometheus + Grafana**: `rabbitmq_prometheus` plugin দিয়ে metrics scrape করে dashboard/alert।
+- মূল যে metric-গুলো watch করবেন: **queue length (backlog)**, **unacked message count**, **consumer utilisation**, **memory/disk alarm**, **redelivery rate**।
+
+---
+
