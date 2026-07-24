@@ -2,6 +2,8 @@
 
 > RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে।
 
+> 📗 Kafka শিখতে চান? দেখুন সমান্তরাল গাইড: [Apache Kafka মাস্টার গাইড](./KAFKA.md) — event streaming, partition, offset, consumer group সবকিছু একই ধাঁচে (beginner → advanced → real-world → interview)।
+
 ## 🎯 শেখার রোডম্যাপ — কোনটার পর কোনটা শিখবেন
 
 সবচেয়ে কার্যকর ক্রম: **আগে বেসিক ধারণা → তারপর core mechanics → তারপর production-grade reliability → তারপর comparison → তারপর হাতে-কলমে project → সবশেষে interview revision।** নিচের ধাপগুলো ঠিক এই ক্রমে অনুসরণ করুন।
