@@ -1,7 +1,5 @@
 # RabbitMQ — সম্পূর্ণ গাইড
 
-> RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে।
-
 ## সূচিপত্র (Table of Contents)
 
 1. [RabbitMQ কী এবং কেন — Real-life Examples](#১-rabbitmq-কী-এবং-কেন--real-life-examples)
@@ -21,6 +19,7 @@
 
 ## ১. RabbitMQ কী এবং কেন — Real-life Examples
 
+> RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে।
 RabbitMQ হচ্ছে একটা **message broker** — মানে দুইটা সিস্টেমের মধ্যে মেসেজ পাঠানো-আনানোর কাজ করে, যাতে তারা একসাথে (synchronously) কাজ না করেও একে অপরের সাথে যোগাযোগ করতে পারে। নিচে কিছু real life example দিলাম:
 
 ### ১. Food Delivery App (যেমন Foodpanda/Pathao)
