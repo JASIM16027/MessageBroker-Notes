@@ -1,0 +1,21 @@
+flowchart TB
+  subgraph PROBLEM["❌ সমস্যা: Round-robin দিয়ে Order ভাঙে"]
+    direction LR
+    P_Q["Queue<br/>deposit_100, withdraw_50, deposit_20"] --> P_C1["Consumer 1<br/>(fast)"]
+    P_Q --> P_C2["Consumer 2<br/>(slow)"]
+    P_C1 --> P_R["deposit_100 ✓<br/>deposit_20 ✓<br/>withdraw_50 ⏳ still processing"]
+    P_C2 --> P_R
+    P_NOTE["ফলাফল: withdraw_50 প্রসেস হওয়ার আগেই<br/>deposit_20 শেষ — balance ভুল হিসাব"]
+  end
+
+  subgraph SOLUTION["✅ সমাধান: Consistent Hash — Same Account = Same Queue"]
+    direction LR
+    S_P["Publish<br/>routing key = account_id"] --> S_H{{Consistent Hash Exchange}}
+    S_H -->|"hash(ACC-9981)"| S_Q1["Queue Shard 7<br/>(একটাই consumer)"]
+    S_H -->|"hash(ACC-4432)"| S_Q2["Queue Shard 2<br/>(একটাই consumer)"]
+    S_Q1 --> S_C1["Consumer A<br/>ACC-9981-এর সব মেসেজ<br/>ঠিক order-এ পায়"]
+    S_Q2 --> S_C2["Consumer B<br/>ACC-4432 — সম্পূর্ণ<br/>স্বাধীন, parallel"]
+  end
+
+  style PROBLEM fill:#fbe8e2,stroke:#b3401f
+  style SOLUTION fill:#e3f5ea,stroke:#1a7f4e

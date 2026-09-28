@@ -1,0 +1,35 @@
+flowchart TB
+  P["Producer<br/>(key = order_id দিয়ে partition ঠিক হয়)"] --> T
+
+  subgraph T["Topic: orders"]
+    direction TB
+    subgraph P0["Partition 0"]
+      direction LR
+      p0_0["offset 0"] --> p0_1["offset 1"] --> p0_2["offset 2"] --> p0_3["offset 3"]
+    end
+    subgraph P1["Partition 1"]
+      direction LR
+      p1_0["offset 0"] --> p1_1["offset 1"] --> p1_2["offset 2"]
+    end
+    subgraph P2["Partition 2"]
+      direction LR
+      p2_0["offset 0"] --> p2_1["offset 1"] --> p2_2["offset 2"] --> p2_3["offset 3"] --> p2_4["offset 4"]
+    end
+  end
+
+  P0 --> B1["Broker 1 (leader)"]
+  P1 --> B2["Broker 2 (leader)"]
+  P2 --> B3["Broker 3 (leader)"]
+
+  subgraph CG["Consumer Group: analytics-service"]
+    direction LR
+    C1["Consumer 1<br/>reads Partition 0"]
+    C2["Consumer 2<br/>reads Partition 1"]
+    C3["Consumer 3<br/>reads Partition 2"]
+  end
+
+  B1 --> C1
+  B2 --> C2
+  B3 --> C3
+
+  NOTE["একটা partition এক সময়ে group-এর একজনই পড়ে<br/>Ordering শুধু per-partition guaranteed, পুরো topic-এ নয়"]

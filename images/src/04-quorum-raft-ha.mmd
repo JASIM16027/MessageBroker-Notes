@@ -1,0 +1,20 @@
+sequenceDiagram
+    participant P as Producer
+    participant L as Leader (Node A)
+    participant F1 as Follower (Node B)
+    participant F2 as Follower (Node C)
+
+    P->>L: publish message
+    L->>F1: replicate
+    L->>F2: replicate
+    F1-->>L: ack (saved)
+    Note over L,F1: Majority (2 of 3) confirmed →<br/>message "committed"
+    L-->>P: confirm — safe now
+
+    Note over L: ⚡ Leader (Node A) crashes
+    F1->>F2: heartbeat missed — start Election
+    F2->>F1: vote
+    Note over F1,F2: Node B has most up-to-date data → becomes new Leader
+    F1-->>P: new Leader ready, resume publishing
+
+    Note over P,F2: কোনো committed মেসেজ হারায়নি —<br/>majority-তে আগে থেকেই ছিল

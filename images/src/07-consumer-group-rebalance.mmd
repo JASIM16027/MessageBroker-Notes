@@ -1,0 +1,23 @@
+flowchart TB
+  subgraph BEFORE["আগে: 2 Consumer, 4 Partition"]
+    direction LR
+    B_C1["Consumer 1<br/>P0, P1"]
+    B_C2["Consumer 2<br/>P2, P3"]
+  end
+
+  BEFORE -->|"Consumer 3 join করলো"| DURING["⚡ Rebalance শুরু<br/>(stop-the-world — সাময়িক consumption বন্ধ)"]
+
+  DURING --> AFTER
+
+  subgraph AFTER["পরে: 3 Consumer, 4 Partition — পুনর্বণ্টন"]
+    direction LR
+    A_C1["Consumer 1<br/>P0"]
+    A_C2["Consumer 2<br/>P2, P3"]
+    A_C3["Consumer 3 (নতুন)<br/>P1"]
+  end
+
+  NOTE["Cooperative Sticky Assignor ব্যবহার করলে —<br/>শুধু P1 সরে (Consumer 1 থেকে Consumer 3-এ),<br/>বাকি সব consumer অক্ষত থাকে (কম disruption)"]
+
+  style BEFORE fill:#e3f2fd,stroke:#1565c0
+  style DURING fill:#fbe8e2,stroke:#b3401f
+  style AFTER fill:#e8f5e9,stroke:#2e7d32

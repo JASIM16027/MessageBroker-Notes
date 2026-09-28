@@ -1,0 +1,21 @@
+sequenceDiagram
+    participant P as Producer (acks=all)
+    participant L as Leader (Broker 1)
+    participant F1 as Follower (Broker 2) — ISR
+    participant F2 as Follower (Broker 3) — ISR
+
+    P->>L: send(record)
+    L->>F1: replicate
+    L->>F2: replicate
+    F1-->>L: fetch ack
+    F2-->>L: fetch ack
+    Note over L,F2: min.insync.replicas=2 satisfied<br/>(leader + 2 ISR members)
+    L-->>P: ack — write durable
+
+    Note over F2: ⚡ Broker 3 slows down / falls behind
+    Note over L,F2: Broker 3 removed from ISR<br/>(no longer "in sync")
+    Note over L,F1: এখনো min.insync.replicas=2 আছে<br/>(leader + Broker 2) — writes চলতে থাকে
+
+    Note over L: ⚡⚡ Leader (Broker 1) crashes too
+    Note over F1: শুধু Broker 2 (ISR) বেঁচে আছে —<br/>min.insync.replicas=2 আর সম্ভব না
+    Note over P,F1: Producer write REJECTED —<br/>availability হারিয়ে consistency রক্ষা হলো
