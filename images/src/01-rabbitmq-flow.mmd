@@ -1,0 +1,15 @@
+sequenceDiagram
+    participant P as Producer
+    participant E as Exchange
+    participant Q as Queue
+    participant C as Consumer
+
+    P->>E: 1. publish (message + routing key)
+    Note over E: Exchange নিজে মেসেজ জমা রাখে না,<br/>শুধু route করে দেয়
+    E->>Q: 2. binding rule অনুযায়ী route
+    Note over Q: মেসেজ Queue-তে জমা থাকে<br/>(buffer), consumer না আসা পর্যন্ত
+    Q->>C: 3. deliver
+    C->>C: 4. process (email পাঠানো, DB update ইত্যাদি)
+    C->>Q: 5. ack — কাজ শেষ, মেসেজ মুছে ফেলো
+
+    Note over C,Q: Consumer ack পাঠানোর আগেই crash করলে —<br/>Queue মেসেজ মুছবে না, আবার deliver করবে

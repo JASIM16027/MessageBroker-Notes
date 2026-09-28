@@ -1,0 +1,20 @@
+flowchart LR
+  subgraph RMQ["RabbitMQ — Queue Model (Smart Broker, Dumb Consumer)"]
+    direction TB
+    R_P["Producer"] --> R_E{{Exchange}}
+    R_E --> R_Q["Queue: [msg1][msg2][msg3]"]
+    R_Q --> R_C["Consumer"]
+    R_C -.->|"ack → DELETED permanently"| R_Q
+    R_NOTE["একবার consume + ack হলে মেসেজ চিরতরে চলে যায়<br/>Replay করা যায় না"]
+  end
+
+  subgraph KFK["Kafka — Log Model (Dumb Broker, Smart Consumer)"]
+    direction TB
+    K_P["Producer"] --> K_T["Topic Partition (append-only log)<br/>[e0][e1][e2][e3][e4]..."]
+    K_T --> K_G1["Consumer Group A<br/>offset: 2"]
+    K_T --> K_G2["Consumer Group B<br/>offset: 4 (independent!)"]
+    K_NOTE["Consume করলে ডেটা মোছে না —<br/>retention পর্যন্ত থাকে, replay সম্ভব"]
+  end
+
+  style RMQ fill:#e3f2fd,stroke:#1565c0
+  style KFK fill:#fff3e0,stroke:#ef6c00
